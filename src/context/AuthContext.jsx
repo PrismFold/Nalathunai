@@ -16,10 +16,10 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  const login = async (identifier, password) => {
+  const login = async (identifier, password, role = 'patient') => {
     setLoading(true);
     try {
-      const loggedUser = await authService.login(identifier, password);
+      const loggedUser = await authService.login(identifier, password, role);
       setUser(loggedUser);
       return loggedUser;
     } finally {

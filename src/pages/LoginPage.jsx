@@ -1,11 +1,28 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Logo } from '../components/Logo';
 import { Button } from '../components/Button';
-import { Shield, Lock, Phone, ArrowRight, CheckCircle2 } from 'lucide-react';
+import {
+  Shield,
+  Lock,
+  Phone,
+  ArrowRight,
+  CheckCircle2,
+  Stethoscope,
+  Building2,
+  User,
+} from 'lucide-react';
 
-export const LoginPage = () => {
+export const LoginPage = ({ initialRole }) => {
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const roleFromQuery = queryParams.get('role');
+
+  const [activeRole, setActiveRole] = useState(
+    initialRole || roleFromQuery || 'patient'
+  ); // 'patient' | 'doctor' | 'organization'
+
   const [identifier, setIdentifier] = useState('9876543210');
   const [password, setPassword] = useState('password123');
   const [error, setError] = useState('');
@@ -16,27 +33,72 @@ export const LoginPage = () => {
   const { login, loading } = useAuth();
   const navigate = useNavigate();
 
+  useEffect(() => {
+    if (activeRole === 'doctor') {
+      setIdentifier('TN-MED-00123');
+      setPassword('password123');
+    } else if (activeRole === 'organization') {
+      setIdentifier('HOSP-PSG-01');
+      setPassword('password123');
+    } else {
+      setIdentifier('9876543210');
+      setPassword('password123');
+    }
+    setError('');
+  }, [activeRole]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     try {
+      if (activeRole === 'organization') {
+        await login(identifier, password, 'organization');
+        navigate('/organization/dashboard');
+        return;
+      }
+
+      if (activeRole === 'doctor') {
+        await login(identifier, password, 'doctor');
+        navigate('/doctor/dashboard');
+        return;
+      }
+
+      // Patient flow
       if (isRegister && !regName) {
         setError('Please provide your full name.');
         return;
       }
-      await login(identifier, password);
+      await login(identifier, password, 'patient');
       navigate('/dashboard');
     } catch (err) {
       setError(err.message || 'Login failed. Please check your credentials.');
     }
   };
 
-  const handleDemoFill = async () => {
+  const handleDemoPatientFill = async () => {
     try {
-      await login('9876543210', 'password123');
+      await login('9876543210', 'password123', 'patient');
       navigate('/dashboard');
     } catch (err) {
-      setError('Demo login failed.');
+      setError('Demo patient login failed.');
+    }
+  };
+
+  const handleDemoDoctorFill = async () => {
+    try {
+      await login('TN-MED-00123', 'password123', 'doctor');
+      navigate('/doctor/dashboard');
+    } catch (err) {
+      setError('Demo doctor login failed: ' + err.message);
+    }
+  };
+
+  const handleDemoOrgFill = async (orgIdentifier = 'HOSP-PSG-01') => {
+    try {
+      await login(orgIdentifier, 'password123', 'organization');
+      navigate('/organization/dashboard');
+    } catch (err) {
+      setError('Demo organization login failed: ' + err.message);
     }
   };
 
@@ -46,11 +108,53 @@ export const LoginPage = () => {
   return (
     <div className="min-h-screen bg-[#f8f7f5] flex flex-col items-center justify-center py-12 px-4">
       {/* Logo */}
-      <div className="mb-8 text-center">
+      <div className="mb-6 text-center">
         <div className="flex justify-center mb-3">
           <Logo size="large" />
         </div>
         <p className="text-sm text-stone-400 font-medium">Your health records. Your control.</p>
+      </div>
+
+      {/* Role Selection Tabs */}
+      <div className="w-full max-w-sm mb-3">
+        <div className="bg-[#FAF7F2] border border-[#E5DDD0] rounded-xl p-1 flex text-xs">
+          <button
+            type="button"
+            onClick={() => setActiveRole('patient')}
+            className={`flex-1 py-2 rounded-lg font-medium transition-all flex items-center justify-center gap-1.5 ${
+              activeRole === 'patient'
+                ? 'bg-[#2F2D29] text-[#F7F3EA] shadow-xs'
+                : 'text-[#686358] hover:text-[#2F2D29]'
+            }`}
+          >
+            <User size={13} />
+            <span>Patient</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveRole('doctor')}
+            className={`flex-1 py-2 rounded-lg font-medium transition-all flex items-center justify-center gap-1.5 ${
+              activeRole === 'doctor'
+                ? 'bg-[#2F2D29] text-[#F7F3EA] shadow-xs'
+                : 'text-[#686358] hover:text-[#2F2D29]'
+            }`}
+          >
+            <Stethoscope size={13} />
+            <span>Doctor</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveRole('organization')}
+            className={`flex-1 py-2 rounded-lg font-medium transition-all flex items-center justify-center gap-1.5 ${
+              activeRole === 'organization'
+                ? 'bg-[#2F2D29] text-[#F7F3EA] shadow-xs'
+                : 'text-[#686358] hover:text-[#2F2D29]'
+            }`}
+          >
+            <Building2 size={13} />
+            <span>Organization</span>
+          </button>
+        </div>
       </div>
 
       {/* Card */}
@@ -67,15 +171,23 @@ export const LoginPage = () => {
                   : 'text-stone-400 hover:text-stone-600'
               }`}
             >
-              Login
+              {activeRole === 'doctor' ? 'Doctor Login' : activeRole === 'organization' ? 'Facility Login' : 'Login'}
             </button>
-            <button
-              type="button"
-              onClick={() => { navigate('/register'); }}
-              className="flex-1 py-3.5 text-sm font-medium transition-colors text-stone-400 hover:text-stone-600"
-            >
-              Register
-            </button>
+            {activeRole !== 'organization' && (
+              <button
+                type="button"
+                onClick={() => {
+                  if (activeRole === 'doctor') {
+                    navigate('/doctor/register');
+                  } else {
+                    navigate('/register');
+                  }
+                }}
+                className="flex-1 py-3.5 text-sm font-medium transition-colors text-stone-400 hover:text-stone-600"
+              >
+                Register
+              </button>
+            )}
           </div>
 
           <div className="p-6 space-y-4">
@@ -87,8 +199,21 @@ export const LoginPage = () => {
               </div>
             )}
 
+            {/* Organization Notice */}
+            {activeRole === 'organization' && (
+              <div className="p-3 bg-[#F4EFE6] border border-[#E5DDD0] text-[#787469] text-xs rounded-lg space-y-1">
+                <div className="flex items-center gap-1.5 font-semibold text-[#2F2D29]">
+                  <Building2 size={14} className="text-[#5D6454]" />
+                  <span>Healthcare Facility Node Login</span>
+                </div>
+                <p className="text-[11px] leading-relaxed">
+                  Hospital administration & clinical records federation gateway. Use your Node ID (e.g. HOSP-PSG-01) to sign in.
+                </p>
+              </div>
+            )}
+
             <form onSubmit={handleSubmit} className="space-y-4">
-              {isRegister && (
+              {isRegister && activeRole === 'patient' && (
                 <>
                   <div>
                     <label className="block text-xs font-semibold text-stone-600 mb-1.5">Full Name</label>
@@ -118,13 +243,31 @@ export const LoginPage = () => {
               )}
 
               <div>
-                <label className="block text-xs font-semibold text-stone-600 mb-1.5">Mobile or Email</label>
+                <label className="block text-xs font-semibold text-stone-600 mb-1.5">
+                  {activeRole === 'doctor'
+                    ? 'Medical Reg No. or Email / Mobile'
+                    : activeRole === 'organization'
+                    ? 'Facility Node ID / Admin Email'
+                    : 'Mobile or Email'}
+                </label>
                 <div className="relative">
-                  <Phone size={15} className="absolute left-3 top-3 text-stone-300" strokeWidth={1.75} />
+                  {activeRole === 'doctor' ? (
+                    <Stethoscope size={15} className="absolute left-3 top-3 text-stone-300" strokeWidth={1.75} />
+                  ) : activeRole === 'organization' ? (
+                    <Building2 size={15} className="absolute left-3 top-3 text-stone-300" strokeWidth={1.75} />
+                  ) : (
+                    <Phone size={15} className="absolute left-3 top-3 text-stone-300" strokeWidth={1.75} />
+                  )}
                   <input
                     type="text"
                     required
-                    placeholder="+91 98765 43210"
+                    placeholder={
+                      activeRole === 'doctor'
+                        ? 'e.g. TN-MED-00123'
+                        : activeRole === 'organization'
+                        ? 'e.g. HOSP-PSG-01'
+                        : '+91 98765 43210'
+                    }
                     value={identifier}
                     onChange={(e) => setIdentifier(e.target.value)}
                     className={`${inputClass} pl-9`}
@@ -155,22 +298,61 @@ export const LoginPage = () => {
                 icon={ArrowRight}
                 className="mt-1"
               >
-                {loading ? 'Authenticating…' : isRegister ? 'Create Account' : 'Sign In'}
+                {loading
+                  ? 'Authenticating…'
+                  : isRegister
+                  ? 'Create Account'
+                  : activeRole === 'doctor'
+                  ? 'Sign In as Doctor'
+                  : activeRole === 'organization'
+                  ? 'Sign In as Facility'
+                  : 'Sign In'}
               </Button>
             </form>
 
-            {/* Demo login */}
-            <div className="border-t border-stone-100 pt-4">
-              <p className="text-[10px] text-stone-400 uppercase tracking-widest font-semibold text-center mb-3">
-                Prototype demo
+            {/* Demo Quick Logins */}
+            <div className="border-t border-stone-100 pt-4 space-y-2">
+              <p className="text-[10px] text-stone-400 uppercase tracking-widest font-semibold text-center mb-2">
+                Prototype Quick Demo
               </p>
-              <button
-                onClick={handleDemoFill}
-                className="w-full py-2.5 px-4 bg-stone-50 hover:bg-stone-100 text-stone-700 rounded border border-stone-200 text-xs font-medium flex items-center justify-center gap-2 transition-colors"
-              >
-                <CheckCircle2 size={14} className="text-[#0f5257]" strokeWidth={1.75} />
-                Demo Login as Ananya Ramesh
-              </button>
+              {activeRole === 'doctor' ? (
+                <button
+                  type="button"
+                  onClick={handleDemoDoctorFill}
+                  className="w-full py-2.5 px-4 bg-stone-50 hover:bg-stone-100 text-stone-700 rounded border border-stone-200 text-xs font-medium flex items-center justify-center gap-2 transition-colors"
+                >
+                  <CheckCircle2 size={14} className="text-[#0f5257]" strokeWidth={1.75} />
+                  Demo Login as Dr. Ananya Kumar
+                </button>
+              ) : activeRole === 'organization' ? (
+                <div className="space-y-1.5">
+                  <button
+                    type="button"
+                    onClick={() => handleDemoOrgFill('HOSP-PSG-01')}
+                    className="w-full py-2 px-3 bg-stone-50 hover:bg-stone-100 text-stone-700 rounded border border-stone-200 text-xs font-medium flex items-center justify-center gap-2 transition-colors"
+                  >
+                    <CheckCircle2 size={14} className="text-[#0f5257]" strokeWidth={1.75} />
+                    Demo Login as PSG Hospitals (H002)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDemoOrgFill('HOSP-KMCH-01')}
+                    className="w-full py-2 px-3 bg-stone-50 hover:bg-stone-100 text-stone-700 rounded border border-stone-200 text-xs font-medium flex items-center justify-center gap-2 transition-colors"
+                  >
+                    <Building2 size={14} className="text-[#5D6454]" strokeWidth={1.75} />
+                    Demo Login as KMCH (H001)
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleDemoPatientFill}
+                  className="w-full py-2.5 px-4 bg-stone-50 hover:bg-stone-100 text-stone-700 rounded border border-stone-200 text-xs font-medium flex items-center justify-center gap-2 transition-colors"
+                >
+                  <CheckCircle2 size={14} className="text-[#0f5257]" strokeWidth={1.75} />
+                  Demo Login as Ananya Ramesh
+                </button>
+              )}
             </div>
           </div>
         </div>

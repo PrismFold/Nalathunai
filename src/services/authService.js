@@ -2,6 +2,8 @@
 // Isolated service layer for mock authentication & token management
 
 import { initialPatientProfile } from '../data/mockData';
+import { doctorAuthService } from './doctorAuthService';
+import { organizationAuthService } from './organizationAuthService';
 
 const AUTH_STORAGE_KEY = 'nalathunai_auth_user';
 const TOKEN_KEY = 'nalathunai_auth_token';
@@ -125,7 +127,18 @@ export const authService = {
    * 
    * TODO: Replace mock API with SNS Workbench endpoint: POST /auth/login
    */
-  async login(identifier, password) {
+  /**
+   * Log in a user (Patient or Doctor) using identifier and password.
+   * Preserves exact patient login behavior.
+   */
+  async login(identifier, password, role = 'patient') {
+    if (role === 'doctor') {
+      return this.loginDoctor(identifier, password);
+    }
+    if (role === 'organization') {
+      return this.loginOrganization(identifier, password);
+    }
+
     // Simulate network delay
     await new Promise((resolve) => setTimeout(resolve, 500));
 
@@ -145,6 +158,7 @@ export const authService = {
     if (foundUser) {
       userObj = {
         ...foundUser,
+        role: 'patient',
         token: `mock-jwt-token-${foundUser.id}`,
         loggedInAt: new Date().toISOString(),
       };
@@ -155,6 +169,7 @@ export const authService = {
       // Default prototype demo account fallback
       userObj = {
         ...initialPatientProfile,
+        role: 'patient',
         token: 'mock-jwt-token-nalathunai-2026',
         loggedInAt: new Date().toISOString(),
       };
@@ -169,13 +184,41 @@ export const authService = {
   },
 
   /**
+   * Log in a verified doctor.
+   */
+  async loginDoctor(identifier, password) {
+    const doc = await doctorAuthService.login(identifier, password);
+    const userObj = {
+      ...doc,
+      role: 'doctor',
+    };
+    localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(userObj));
+    localStorage.setItem(TOKEN_KEY, doc.token);
+    return userObj;
+  },
+
+  /**
+   * Log in an organization / hospital facility node.
+   */
+  async loginOrganization(identifier, password) {
+    const org = await organizationAuthService.login(identifier, password);
+    const userObj = {
+      ...org,
+      role: 'organization',
+    };
+    localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(userObj));
+    localStorage.setItem(TOKEN_KEY, org.token);
+    return userObj;
+  },
+
+  /**
    * Log out current user and clear local persistence.
-   * 
-   * TODO: Replace mock logout with SNS Workbench endpoint: POST /auth/logout
    */
   async logout() {
     localStorage.removeItem(AUTH_STORAGE_KEY);
     localStorage.removeItem(TOKEN_KEY);
+    await doctorAuthService.logout();
+    await organizationAuthService.logout();
     return true;
   },
 

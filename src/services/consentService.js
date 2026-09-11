@@ -66,7 +66,10 @@ export const consentService = {
     
     const newConsent = {
       id: `CONS-${Date.now().toString().slice(-4)}`,
-      doctorName: targetRequest.requesterName,
+      patientId: targetRequest.patientId || 'PAT-9082',
+      patientName: targetRequest.patientName || 'Ananya Ramesh',
+      doctorName: targetRequest.doctorName || targetRequest.requesterName,
+      doctorRegNo: targetRequest.doctorRegNo || 'TN-MED-00123',
       hospitalName: targetRequest.hospitalName,
       accessLevel: targetRequest.accessLevel,
       requestedRecords: targetRequest.requestedRecords || ['All Records'],
@@ -93,8 +96,26 @@ export const consentService = {
   async denyConsent(requestId) {
     await new Promise((resolve) => setTimeout(resolve, 300));
     const pendingList = getStoredPendingRequests();
+    const target = pendingList.find((r) => r.id === requestId);
     const updatedPending = pendingList.filter((r) => r.id !== requestId);
     localStorage.setItem(PENDING_STORAGE_KEY, JSON.stringify(updatedPending));
+
+    if (target) {
+      try {
+        const REJECTED_KEY = 'nalathunai_rejected_requests';
+        const raw = localStorage.getItem(REJECTED_KEY);
+        const rejectedList = raw ? JSON.parse(raw) : [];
+        const rejectedItem = {
+          ...target,
+          status: 'Rejected',
+          deniedDate: 'Today',
+        };
+        localStorage.setItem(REJECTED_KEY, JSON.stringify([rejectedItem, ...rejectedList]));
+      } catch (e) {
+        console.warn('Failed to store rejected request', e);
+      }
+    }
+
     return updatedPending;
   },
 

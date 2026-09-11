@@ -66,6 +66,12 @@ export const LandingPage = () => {
           {/* Action Right */}
           <div className="hidden md:flex items-center gap-4">
             <button
+              onClick={() => navigate('/login?role=doctor')}
+              className="text-xs font-medium text-[#5D6454] hover:text-[#2F2D29] transition-colors"
+            >
+              Doctor Portal
+            </button>
+            <button
               onClick={() => navigate(isAuthenticated ? '/dashboard' : '/login')}
               className="text-xs font-semibold text-[#2F2D29] hover:text-[#5D6454] transition-colors"
             >
@@ -104,10 +110,22 @@ export const LandingPage = () => {
             >
               About
             </button>
-            <div className="pt-2 border-t border-[#E5DDD0]">
+            <div className="pt-2 border-t border-[#E5DDD0] flex flex-col gap-2">
               <button
-                onClick={() => navigate(isAuthenticated ? '/dashboard' : '/login')}
-                className="text-xs font-semibold text-[#2F2D29]"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  navigate('/login?role=doctor');
+                }}
+                className="text-xs font-medium text-[#5D6454] text-left"
+              >
+                Doctor Portal
+              </button>
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  navigate(isAuthenticated ? '/dashboard' : '/login');
+                }}
+                className="text-xs font-semibold text-[#2F2D29] text-left"
               >
                 {isAuthenticated ? 'Go to Dashboard' : 'Login'}
               </button>
