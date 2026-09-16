@@ -323,7 +323,7 @@ export const ConsentPage = () => {
             <div className="space-y-2 bg-[#FAF7F2] border border-[#E5DDD0] rounded-xl p-4">
               {[
                 ['Provider', `${approvalModalRequest.hospitalName} — ${approvalModalRequest.requesterName}`],
-                ['Records', approvalModalRequest.requestedRecords.join(', ')],
+                ['Records', Array.isArray(approvalModalRequest.requestedRecords) ? approvalModalRequest.requestedRecords.join(', ') : (approvalModalRequest.requestedRecords || 'All Records')],
                 ['Duration', approvalModalRequest.duration],
                 ['Purpose', approvalModalRequest.purpose],
               ].map(([label, value]) => (
