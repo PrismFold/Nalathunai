@@ -2,6 +2,7 @@ import React from 'react';
 import { Menu, LogOut, User } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { NotificationDropdown } from './NotificationDropdown';
+import { WebhookStatusBadge } from './WebhookStatusBadge';
 import { Logo } from './Logo';
 
 export const Header = ({ onMobileMenuToggle }) => {
@@ -25,8 +26,12 @@ export const Header = ({ onMobileMenuToggle }) => {
           </div>
         </div>
 
-        {/* Right: Notifications, Patient, Logout */}
+        {/* Right: Webhook Badge, Notifications, Patient, Logout */}
         <div className="flex items-center gap-4">
+          <WebhookStatusBadge compact={false} />
+
+          <div className="h-5 w-px bg-[#E5DDD0] hidden sm:block" />
+
           <NotificationDropdown />
 
           <div className="h-5 w-px bg-[#E5DDD0] hidden sm:block" />

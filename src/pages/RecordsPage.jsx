@@ -507,11 +507,45 @@ export const RecordsPage = () => {
             </div>
 
             <div>
-              <h4 className="text-xs font-semibold text-[#2F2D29] mb-1.5 font-mono uppercase tracking-wider">Clinical Summary</h4>
+              <h4 className="text-xs font-semibold text-[#2F2D29] mb-1.5 font-mono uppercase tracking-wider">Clinical Summary &amp; Synthesis</h4>
               <p className="p-3.5 bg-[#F4EFE6] border border-[#E8E1D4] rounded-xl text-[#4B4A3F] leading-relaxed">
                 {selectedRecord.summary || selectedRecord.description}
               </p>
             </div>
+
+            {selectedRecord.vitals && (
+              <div className="space-y-2">
+                <h4 className="text-xs font-semibold text-[#2F2D29] font-mono uppercase tracking-wider">
+                  Supabase Clinical Biomarkers
+                </h4>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                  <div className="p-2.5 bg-[#FAF7F2] border border-[#E5DDD0] rounded-xl text-center">
+                    <div className="text-[10px] font-mono text-[#8C877C] uppercase">Glucose</div>
+                    <div className="font-semibold text-[13px] text-[#2F2D29] mt-0.5">
+                      {selectedRecord.vitals.bloodGlucose || '—'} <span className="text-[10px] font-normal text-[#8C877C]">mg/dL</span>
+                    </div>
+                  </div>
+                  <div className="p-2.5 bg-[#FAF7F2] border border-[#E5DDD0] rounded-xl text-center">
+                    <div className="text-[10px] font-mono text-[#8C877C] uppercase">HbA1c</div>
+                    <div className="font-semibold text-[13px] text-[#2F2D29] mt-0.5">
+                      {selectedRecord.vitals.hba1c || '—'} <span className="text-[10px] font-normal text-[#8C877C]">%</span>
+                    </div>
+                  </div>
+                  <div className="p-2.5 bg-[#FAF7F2] border border-[#E5DDD0] rounded-xl text-center">
+                    <div className="text-[10px] font-mono text-[#8C877C] uppercase">Cholesterol</div>
+                    <div className="font-semibold text-[13px] text-[#2F2D29] mt-0.5">
+                      {selectedRecord.vitals.cholesterol || '—'} <span className="text-[10px] font-normal text-[#8C877C]">mg/dL</span>
+                    </div>
+                  </div>
+                  <div className="p-2.5 bg-[#FAF7F2] border border-[#E5DDD0] rounded-xl text-center">
+                    <div className="text-[10px] font-mono text-[#8C877C] uppercase">BMI</div>
+                    <div className="font-semibold text-[13px] text-[#2F2D29] mt-0.5">
+                      {selectedRecord.vitals.bmi || '—'}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </Modal>
       )}

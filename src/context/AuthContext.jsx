@@ -16,10 +16,10 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  const login = async (identifier, password) => {
+  const login = async (identifier, password, role = 'patient') => {
     setLoading(true);
     try {
-      const loggedUser = await authService.login(identifier, password);
+      const loggedUser = await authService.login(identifier, password, role);
       setUser(loggedUser);
       return loggedUser;
     } finally {
@@ -43,8 +43,43 @@ export const AuthProvider = ({ children }) => {
     return updated;
   };
 
+  const requestLoginOtp = async (identifier, preferredChannel = 'auto', role = 'patient') => {
+    return await authService.requestLoginOtp(identifier, preferredChannel, role);
+  };
+
+  const verifyLoginOtp = async (identifier, submittedOtp, role = 'patient') => {
+    setLoading(true);
+    try {
+      const loggedUser = await authService.verifyLoginOtp(identifier, submittedOtp, role);
+      setUser(loggedUser);
+      return loggedUser;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const role = user?.role || 'patient';
+  const isDoctor = role === 'doctor';
+  const isHospital = role === 'hospital';
+  const isPatient = role === 'patient';
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, updateProfile, isAuthenticated: !!user }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        role,
+        isDoctor,
+        isHospital,
+        isPatient,
+        loading,
+        login,
+        requestLoginOtp,
+        verifyLoginOtp,
+        logout,
+        updateProfile,
+        isAuthenticated: !!user,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

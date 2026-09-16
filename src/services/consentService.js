@@ -1,5 +1,4 @@
-// Access & Consent Management Service for Nalathunai Patient Platform
-import { initialConsents, initialPendingRequests } from '../data/mockData';
+import { initialConsents, initialPendingRequests } from '../data/mockData.js';
 
 const CONSENTS_STORAGE_KEY = 'nalathunai_active_consents';
 const PENDING_STORAGE_KEY = 'nalathunai_pending_requests';

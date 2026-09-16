@@ -10,17 +10,17 @@ export const PasswordStep = () => {
   const navigate = useNavigate();
   const { regState, setAccountCreated } = useRegistration();
 
-  // Guard: Step 3 Email must be verified
-  if (!regState.emailVerified) {
-    return <Navigate to="/register/email-verification" replace />;
-  }
-
-  const [password, setPassword] = useState('Password@123');
-  const [confirmPassword, setConfirmPassword] = useState('Password@123');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // Guard: Step 3 Email must be verified
+  if (!regState.emailVerified) {
+    return <Navigate to="/register/email-verification" replace />;
+  }
 
   // Requirements checks
   const hasMinLength = password.length >= 8;
@@ -37,7 +37,7 @@ export const PasswordStep = () => {
       if (!passwordsMatch) {
         setError('Passwords do not match. Please re-enter.');
       } else {
-        setError('Please ensure your password satisfies all security requirements.');
+        setError('Please ensure your password satisfies all security requirements (min 8 chars, 1 number, 1 special char).');
       }
       return;
     }
@@ -50,7 +50,11 @@ export const PasswordStep = () => {
         dateOfBirth: regState.personalDetails.dateOfBirth,
         bloodGroup: regState.personalDetails.bloodGroup,
         email: regState.personalDetails.email,
+        mobile: regState.phoneNumber || regState.personalDetails.mobile,
         aadhaarNumber: regState.aadhaarNumber,
+        abhaId: regState.personalDetails.abhaId,
+        city: regState.personalDetails.city,
+        primaryHospital: regState.personalDetails.primaryHospital,
         password: password,
       });
 

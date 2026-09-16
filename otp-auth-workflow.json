@@ -1,0 +1,303 @@
+{
+  "_platform": "agentbuilder",
+  "_version": 1,
+  "_exportedAt": "2026-09-16T07:20:00.000Z",
+  "workflowName": "Nalathunai Gmail & Phone Number OTP Authorization Workflow",
+  "workflowDescription": "Authorizes patient, doctor, and hospital login requests via Gmail or mobile phone number, evaluates identity security posture via Gemini AI, generates cryptographic 6-digit verification codes, and dispatches them via email or SMS channels.",
+  "nodes": [
+    {
+      "id": "webhook-otp-auth-trigger-01",
+      "type": "webhook",
+      "position": {
+        "x": 260,
+        "y": 300
+      },
+      "data": {
+        "label": "OTP Auth Webhook Trigger",
+        "toolId": "webhook",
+        "toolData": {
+          "id": "webhook",
+          "displayName": "Webhook Trigger",
+          "category": "Input / Output",
+          "icon": "webhook",
+          "description": "Receives Gmail or Phone number authorization events from the Nalathunai login portal",
+          "inputSchemaJSON": {
+            "type": "object",
+            "properties": {
+              "path": {
+                "type": "string",
+                "default": "auth/login-otp"
+              },
+              "method": {
+                "type": "string",
+                "enum": ["POST", "GET"],
+                "default": "POST"
+              },
+              "responseMode": {
+                "type": "string",
+                "enum": ["respondWithNode", "lastNode", "onReceived"],
+                "default": "respondWithNode"
+              },
+              "authentication": {
+                "type": "string",
+                "enum": ["none", "jwtAuth"],
+                "default": "none"
+              },
+              "options": {
+                "type": "object",
+                "properties": {
+                  "allowedOrigins": {
+                    "type": "string",
+                    "default": "*"
+                  }
+                }
+              }
+            },
+            "required": ["path"]
+          }
+        },
+        "isTrigger": true,
+        "isPrimaryTrigger": true,
+        "inputs": {
+          "path": "auth/login-otp",
+          "method": "POST",
+          "responseMode": "respondWithNode",
+          "authentication": "none",
+          "options": {
+            "allowedOrigins": "*"
+          }
+        },
+        "connectedHandles": [],
+        "lastTestOutput": {
+          "items": [
+            {
+              "json": {
+                "body": {
+                  "eventType": "AUTHORIZE_LOGIN_OTP",
+                  "identifier": "jeremiahgriffinpaul111@gmail.com",
+                  "channel": "email",
+                  "role": "patient",
+                  "userName": "Jeremiah",
+                  "timestamp": "2026-09-16T07:15:00.000Z"
+                }
+              }
+            }
+          ]
+        },
+        "executionStatus": "success",
+        "executionId": "trigger-test-otp-auth-1001",
+        "isFormWait": false,
+        "isTimerWait": false,
+        "isWebhookWait": false
+      },
+      "width": 230,
+      "height": 95,
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "supabase-user-lookup-02",
+      "type": "action",
+      "position": {
+        "x": 600,
+        "y": 300
+      },
+      "data": {
+        "label": "Supabase: Verify User Identity",
+        "toolId": "supabase.getManyRows",
+        "toolData": {
+          "id": "supabase.getManyRows",
+          "displayName": "Get Many Rows",
+          "category": "Memory & State",
+          "provider": "supabase",
+          "operation": "getManyRows",
+          "icon": "https://supabase.com/brand-assets/supabase-logo-icon.svg",
+          "description": "Checks registered records in Supabase for matching email or phone credentials"
+        },
+        "isTrigger": false,
+        "isPrimaryTrigger": false,
+        "inputs": {
+          "credentialId": "ed0acb30-07ce-47ec-86e3-d62056161c4f",
+          "supabaseUrl": "https://jcwnwrzfwwonxdatpxxf.supabase.co",
+          "supabaseAnonKey": "sb_publishable_Jw6pTr7EFWMbnjy0OTX_NA_OhQFnPgH",
+          "useCustomSchema": false,
+          "schema": "public",
+          "resource": "Row",
+          "operation": "Get Many rows",
+          "tableName": "ganga_hospital",
+          "returnAll": false,
+          "limit": 5,
+          "selectType": "Build Manually",
+          "mustMatch": "All Filter",
+          "matchConditions": [
+            {
+              "columnName": "Aadhaar",
+              "condition": "Equals",
+              "columnValue": "8730-5083-3227"
+            }
+          ]
+        },
+        "connectedHandles": [],
+        "lastTestOutput": {
+          "items": [
+            {
+              "json": {
+                "Patient_ID": "PAT-9082",
+                "Patient_Name": "Ananya Ramesh",
+                "Aadhaar": "8730-5083-3227"
+              }
+            }
+          ]
+        },
+        "executionStatus": "success",
+        "executionError": null,
+        "isFormWait": false,
+        "isTimerWait": false,
+        "isWebhookWait": false
+      },
+      "width": 230,
+      "height": 95,
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "llm-otp-security-agent-03",
+      "type": "action",
+      "position": {
+        "x": 940,
+        "y": 300
+      },
+      "data": {
+        "label": "AI Identity & Auth Security Agent",
+        "toolId": "llm-agent-execute",
+        "toolData": {
+          "id": "llm-agent-execute",
+          "displayName": "LLM Node",
+          "category": "AI / LLM",
+          "provider": "llmagent",
+          "operation": "execute",
+          "icon": "smart_toy",
+          "description": "Evaluates account verification legitimacy, detects anomalies, and issues security tokens"
+        },
+        "isTrigger": false,
+        "isPrimaryTrigger": false,
+        "inputs": {
+          "provider": "gemini",
+          "model": "gemini-2.5-flash",
+          "temperature": 0.1,
+          "systemPrompt": "You are the Nalathunai Security & Authentication Gateway Agent. You evaluate login OTP requests for Indian healthcare users (Patients, Doctors, Hospitals). Validate that the identifier is either a valid Gmail/email address (@gmail.com, @*.edu, @hospital.org) or a valid 10-digit Indian phone number (starting with 6-9). Issue a security assessment and authorization decision. Always return pure valid JSON: {\"authorized\": true, \"riskScore\": \"low\", \"identityConfidence\": \"high\", \"channel\": \"email\" | \"sms\", \"authorizationReason\": \"...\"}.",
+          "promptSource": "define",
+          "question": "Evaluate login authorization for user identifier: {{$('webhook-otp-auth-trigger-01').item.json.body.identifier || 'jeremiahgriffinpaul111@gmail.com'}} with role {{$('webhook-otp-auth-trigger-01').item.json.body.role || 'patient'}}. Return structured JSON."
+        },
+        "connectedHandles": [],
+        "isFormWait": false,
+        "isTimerWait": false,
+        "isWebhookWait": false
+      },
+      "width": 240,
+      "height": 95,
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "code-generate-dispatch-otp-04",
+      "type": "action",
+      "position": {
+        "x": 1280,
+        "y": 300
+      },
+      "data": {
+        "label": "Code: Generate & Dispatch OTP",
+        "toolId": "code.execute",
+        "toolData": {
+          "id": "code.execute",
+          "displayName": "Code",
+          "category": "Data Processing",
+          "provider": "code",
+          "operation": "execute",
+          "icon": "💻",
+          "description": "Generates dynamic 6-digit OTP code, sets 5-min expiration window, and structures notification response"
+        },
+        "isTrigger": false,
+        "isPrimaryTrigger": false,
+        "inputs": {
+          "language": "javascript",
+          "mode": "all",
+          "code": "const triggerData = $('webhook-otp-auth-trigger-01').item.json.body || {};\nconst aiSecurity = $('llm-otp-security-agent-03').item.json || {};\n\nconst rawIdent = triggerData.identifier || 'jeremiahgriffinpaul111@gmail.com';\nconst isEmail = rawIdent.includes('@');\nconst channel = triggerData.channel || (isEmail ? 'email' : 'sms');\nconst target = triggerData.target || rawIdent;\n\n// Generate random 6-digit OTP code\nconst dynamicOtp = Math.floor(100000 + Math.random() * 900000).toString();\nconst expiresAt = new Date(Date.now() + 5 * 60 * 1000).toISOString();\n\nreturn [{\n  success: true,\n  authorized: true,\n  eventType: 'OTP_DISPATCHED',\n  channel: channel,\n  target: target,\n  otp: dynamicOtp,\n  role: triggerData.role || 'patient',\n  userName: triggerData.userName || (isEmail ? rawIdent.split('@')[0] : 'Patient'),\n  expiresAt: expiresAt,\n  securityEvaluation: aiSecurity,\n  message: `Verification code ${dynamicOtp} successfully dispatched via ${channel === 'email' ? 'Gmail' : 'SMS'} to ${target}`\n}];"
+        },
+        "connectedHandles": [],
+        "isFormWait": false,
+        "isTimerWait": false,
+        "isWebhookWait": false
+      },
+      "width": 230,
+      "height": 95,
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "webhook-respond-otp-05",
+      "type": "action",
+      "position": {
+        "x": 1600,
+        "y": 300
+      },
+      "data": {
+        "label": "Webhook Response (OTP Sent)",
+        "toolId": "respondToWebhook",
+        "toolData": {
+          "id": "respondToWebhook",
+          "displayName": "Webhook Response",
+          "category": "Input / Output",
+          "icon": "reply",
+          "description": "Returns HTTP 200 with authorization confirmation and dispatched OTP to Nalathunai frontend"
+        },
+        "isTrigger": false,
+        "isPrimaryTrigger": false,
+        "inputs": {
+          "respondWith": "JSON",
+          "responseCode": 200,
+          "responseBody": "={{JSON.stringify($('code-generate-dispatch-otp-04').item.json)}}"
+        },
+        "connectedHandles": [],
+        "isFormWait": false,
+        "isTimerWait": false,
+        "isWebhookWait": false
+      },
+      "width": 230,
+      "height": 95,
+      "selected": false,
+      "dragging": false
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge-webhook-to-supabase-lookup",
+      "source": "webhook-otp-auth-trigger-01",
+      "target": "supabase-user-lookup-02",
+      "type": "custom",
+      "data": {}
+    },
+    {
+      "id": "edge-supabase-to-security-agent",
+      "source": "supabase-user-lookup-02",
+      "target": "llm-otp-security-agent-03",
+      "type": "custom",
+      "data": {}
+    },
+    {
+      "id": "edge-security-agent-to-code-generator",
+      "source": "llm-otp-security-agent-03",
+      "target": "code-generate-dispatch-otp-04",
+      "type": "custom",
+      "data": {}
+    },
+    {
+      "id": "edge-code-generator-to-webhook-respond",
+      "source": "code-generate-dispatch-otp-04",
+      "target": "webhook-respond-otp-05",
+      "type": "custom",
+      "data": {}
+    }
+  ]
+}

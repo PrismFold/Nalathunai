@@ -1,0 +1,376 @@
+{
+  "_platform": "agentbuilder",
+  "_version": 1,
+  "_exportedAt": "2026-09-15T07:37:40.247Z",
+  "nodes": [
+    {
+      "id": "webhook-patient-trigger-01",
+      "type": "webhook",
+      "position": {
+        "x": 360.76905588461943,
+        "y": 319.99999999999994
+      },
+      "data": {
+        "label": "Patient Request Webhook Trigger",
+        "toolId": "webhook",
+        "toolData": {
+          "id": "webhook",
+          "displayName": "Webhook Trigger",
+          "category": "Input / Output",
+          "icon": "webhook",
+          "description": "Receives patient data upload or retrieval request from Nalathunai frontend",
+          "inputSchemaJSON": {
+            "type": "object",
+            "properties": {
+              "path": {
+                "type": "string"
+              },
+              "method": {
+                "type": "string",
+                "enum": [
+                  "GET",
+                  "POST",
+                  "PUT",
+                  "DELETE"
+                ],
+                "default": "POST"
+              },
+              "responseMode": {
+                "type": "string",
+                "enum": [
+                  "onReceived",
+                  "lastNode",
+                  "respondWithNode"
+                ],
+                "default": "respondWithNode"
+              },
+              "authentication": {
+                "type": "string",
+                "enum": [
+                  "none",
+                  "jwtAuth"
+                ],
+                "default": "none"
+              },
+              "options": {
+                "type": "object",
+                "properties": {
+                  "allowedOrigins": {
+                    "type": "string",
+                    "default": "*"
+                  }
+                }
+              }
+            },
+            "required": [
+              "path"
+            ]
+          }
+        },
+        "isTrigger": true,
+        "isPrimaryTrigger": true,
+        "inputs": {
+          "path": "records/retrieve",
+          "method": "POST",
+          "responseMode": "respondWithNode",
+          "authentication": "none",
+          "options": {
+            "allowedOrigins": "*"
+          }
+        },
+        "connectedHandles": [],
+        "lastTestOutput": {
+          "items": [
+            {
+              "json": {
+                "body": {
+                  "event": "FRONTEND_LAUNCH_HANDSHAKE",
+                  "source": "nalathunai_patient_portal",
+                  "timestamp": "2026-09-15T05:13:23.567Z",
+                  "patientId": "USR-162674",
+                  "abhaId": "91-4829-1029-4720",
+                  "patientName": "Jeremiah",
+                  "aadhaar": "8730-5083-3227",
+                  "hospitalName": "Ganga Hospital",
+                  "hospitalTable": "ganga_hospital",
+                  "recordType": "All Medical Records",
+                  "dateRange": "Recent 30 Days",
+                  "reason": "Automatic frontend launch response & Supabase record synchronization",
+                  "requestId": "RET-AUTO-3567",
+                  "supabaseStatus": "connected",
+                  "availableTables": [
+                    "ganga_hospital",
+                    "kmch_hospital",
+                    "kongunad_hospital",
+                    "psg_hospital",
+                    "sri_ramakrishna_hospital"
+                  ]
+                },
+                "query": {},
+                "headers": {
+                  "x-forwarded-for": "103.196.28.74",
+                  "x-forwarded-proto": "https",
+                  "x-forwarded-port": "443",
+                  "host": "api.agents.snsihub.ai",
+                  "x-amzn-trace-id": "Root=1-6aa8d3f4-215cf2b904e0c5ec26b04499",
+                  "content-length": "600",
+                  "sec-ch-ua-platform": "\"Windows\"",
+                  "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJVU1ItMTYyNjc0IiwibmFtZSI6IkplcmVtaWFoIiwiZW1haWwiOiJqZXJlbWlhaGdyaWZmaW5wYXVsMTExQGdtYWlsLmNvbSIsInBob25lIjoiODAxNTE0MzE3OCIsInJvbGUiOiJwYXRpZW50IiwiYWJoYUlkIjoiOTEtNDgyOS0xMDI5LTQ3MjAiLCJpYXQiOjE3ODkyMzYxODYsImV4cCI6MTc4OTg0MDk4Nn0.c2lnX1VTUi0xNjI2NzRfOTEtNDgyOS0xMDI5LTQ3MjBfMTc4OTIzNjE4Njk5Mw",
+                  "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36",
+                  "sec-ch-ua": "\"Brave\";v=\"153\", \"Not_A Brand\";v=\"8\", \"Chromium\";v=\"153\"",
+                  "dnt": "1",
+                  "content-type": "application/json",
+                  "sec-ch-ua-mobile": "?0",
+                  "accept": "*/*",
+                  "sec-gpc": "1",
+                  "origin": "http://localhost:5174",
+                  "sec-fetch-site": "cross-site",
+                  "sec-fetch-mode": "cors",
+                  "sec-fetch-dest": "empty",
+                  "referer": "http://localhost:5174/",
+                  "accept-encoding": "gzip, deflate, br, zstd",
+                  "accept-language": "en-US,en;q=0.6",
+                  "priority": "u=1, i"
+                },
+                "params": {},
+                "file": null
+              }
+            }
+          ],
+          "usage": {
+            "category": "INTEGRATION",
+            "metrics": {
+              "durationMs": 0,
+              "apiCalls": 1,
+              "payloadSizeBytes": 1826
+            },
+            "cost": 2
+          }
+        },
+        "executionStatus": "success",
+        "executionId": "trigger-test-1789449935459",
+        "isFormWait": false,
+        "isTimerWait": false,
+        "isWebhookWait": false
+      },
+      "width": 220,
+      "height": 99,
+      "positionAbsolute": {
+        "x": 360.76905588461943,
+        "y": 319.99999999999994
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "supabase-get-records-04",
+      "type": "action",
+      "position": {
+        "x": 840.4253138461519,
+        "y": 305.42284780769205
+      },
+      "data": {
+        "label": "Supabase: Get Hospital Records",
+        "toolId": "supabase.getManyRows",
+        "toolData": {
+          "id": "supabase.getManyRows",
+          "displayName": "Get Many Rows",
+          "category": "Memory & State",
+          "provider": "supabase",
+          "operation": "getManyRows",
+          "icon": "https://supabase.com/brand-assets/supabase-logo-icon.svg",
+          "description": "Fetches medical records from Supabase for the authenticated patient"
+        },
+        "isTrigger": false,
+        "isPrimaryTrigger": false,
+        "inputs": {
+          "credentialId": "ed0acb30-07ce-47ec-86e3-d62056161c4f",
+          "supabaseUrl": "https://jcwnwrzfwwonxdatpxxf.supabase.co",
+          "supabaseAnonKey": "sb_publishable_Jw6pTr7EFWMbnjy0OTX_NA_OhQFnPgH",
+          "useCustomSchema": false,
+          "schema": "public",
+          "resource": "Row",
+          "operation": "Get Many rows",
+          "tableName": "sri_ramakrishna_hospital",
+          "returnAll": false,
+          "limit": 50,
+          "selectType": "Build Manually",
+          "mustMatch": "All Filter",
+          "matchConditions": [
+            {
+              "columnName": "Aadhaar",
+              "condition": "Equals",
+              "columnValue": "={{$('webhook-patient-trigger-01').item.json.body.aadhaar || '8730-5083-3227'}}"
+            }
+          ]
+        },
+        "connectedHandles": [],
+        "lastTestOutput": {
+          "items": []
+        },
+        "executionStatus": "success",
+        "executionError": null,
+        "isFormWait": false,
+        "isTimerWait": false,
+        "isWebhookWait": false
+      },
+      "width": 220,
+      "height": 93,
+      "selected": false,
+      "dragging": false,
+      "positionAbsolute": {
+        "x": 840.4253138461519,
+        "y": 305.42284780769205
+      }
+    },
+    {
+      "id": "ai-summarization-agent-05",
+      "type": "action",
+      "position": {
+        "x": 1279.4362029230772,
+        "y": 303.80316423076897
+      },
+      "data": {
+        "label": "AI Clinical Summarization Agent",
+        "toolId": "llm-agent-execute",
+        "toolData": {
+          "id": "llm-agent-execute",
+          "displayName": "LLM Node",
+          "category": "AI / LLM",
+          "provider": "llmagent",
+          "operation": "execute",
+          "icon": "smart_toy",
+          "description": "Synthesizes clinical metrics (Glucose, HbA1c, Cholesterol, BMI, Diagnoses) into a structured summary"
+        },
+        "isTrigger": false,
+        "isPrimaryTrigger": false,
+        "inputs": {
+          "provider": "gemini",
+          "model": "gemini-2.5-flash",
+          "temperature": 0.2,
+          "systemPrompt": "You are the Nalathunai AI Medical Summary Agent. You receive patient clinical records retrieved from Supabase hospital tables (Ganga Hospital, KMCH, Kongunad, PSG, Sri Ramakrishna Hospital). Your mission is to analyze vital biomarkers: Blood Glucose (mg/dL), HbA1c (%), Total Cholesterol (mg/dL), BMI, symptoms, and primary diagnoses. You must generate a clear, structured clinical synthesis with key findings, metric anomalies (elevated or normal), and personalized health guidance. Never invent data. Respond in valid JSON format: {\"clinicalOverview\": \"...\", \"vitalsAssessment\": {\"glycemicControl\": \"...\", \"cardiovascular\": \"...\", \"bmiStatus\": \"...\"}, \"keyFindings\": [\"...\"], \"recommendations\": [\"...\"]}.",
+          "promptSource": "define",
+          "question": "Synthesize the following Supabase patient records for Patient {{$('webhook-patient-trigger-01').item.json.body.patientName || 'Ananya Ramesh'}} (ID: {{$('webhook-patient-trigger-01').item.json.body.patientId || 'PAT-9082'}}): {{JSON.stringify($json)}}. Return pure structured JSON."
+        },
+        "connectedHandles": [],
+        "isFormWait": false,
+        "isTimerWait": false,
+        "isWebhookWait": false
+      },
+      "width": 220,
+      "height": 93,
+      "positionAbsolute": {
+        "x": 1279.4362029230772,
+        "y": 303.80316423076897
+      },
+      "selected": true,
+      "dragging": false
+    },
+    {
+      "id": "code-format-response-06",
+      "type": "action",
+      "position": {
+        "x": 1550,
+        "y": 320
+      },
+      "data": {
+        "label": "Format Unified Response",
+        "toolId": "code.execute",
+        "toolData": {
+          "id": "code.execute",
+          "displayName": "Code",
+          "category": "Data Processing",
+          "provider": "code",
+          "operation": "execute",
+          "icon": "💻",
+          "description": "Constructs the unified response containing created row, fetched records, and AI clinical summary"
+        },
+        "isTrigger": false,
+        "isPrimaryTrigger": false,
+        "inputs": {
+          "language": "javascript",
+          "mode": "all",
+          "code": "const triggerBody = $('webhook-patient-trigger-01').item.json.body || {};\nconst createdRow = $('supabase-create-row-03').item.json || {};\nconst fetchedRows = $('supabase-get-records-04').item.json || [];\nconst aiSummaryRaw = $('ai-summarization-agent-05').item.json || {};\n\nlet parsedSummary = aiSummaryRaw;\nif (typeof aiSummaryRaw === 'string') {\n  try {\n    parsedSummary = JSON.parse(aiSummaryRaw);\n  } catch (e) {\n    parsedSummary = { clinicalOverview: aiSummaryRaw };\n  }\n}\n\nconst recordsList = Array.isArray(fetchedRows) ? fetchedRows : (fetchedRows ? [fetchedRows] : []);\nconst totalRecords = recordsList.length + (createdRow ? 1 : 0);\n\nreturn [{\n  success: true,\n  mode: 'immediate_summary',\n  status: 'completed',\n  timestamp: new Date().toISOString(),\n  requestId: triggerBody.requestId || ('REQ-' + Date.now().toString().slice(-4)),\n  patient: {\n    id: triggerBody.patientId || createdRow.Patient_ID || 'PAT-9082',\n    name: triggerBody.patientName || createdRow.Patient_Name || 'Ananya Ramesh',\n    aadhaar: triggerBody.aadhaar || createdRow.Aadhaar || '8730-5083-3227'\n  },\n  hospital: triggerBody.hospitalName || createdRow.Hospital_Name || 'Ganga Hospital',\n  createdRecord: createdRow,\n  retrievedRecords: recordsList,\n  totalRecordsCount: totalRecords,\n  aiSummary: parsedSummary,\n  message: 'Patient record processed in Supabase and summarized successfully.'\n}];"
+        },
+        "connectedHandles": [],
+        "isFormWait": false,
+        "isTimerWait": false,
+        "isWebhookWait": false
+      },
+      "width": 220,
+      "height": 93,
+      "positionAbsolute": {
+        "x": 1550,
+        "y": 320
+      }
+    },
+    {
+      "id": "webhook-respond-summary-07",
+      "type": "action",
+      "position": {
+        "x": 1840,
+        "y": 320
+      },
+      "data": {
+        "label": "Webhook Respond (Immediate Summary)",
+        "toolId": "respondToWebhook",
+        "toolData": {
+          "id": "respondToWebhook",
+          "displayName": "Webhook Response",
+          "category": "Input / Output",
+          "icon": "reply",
+          "description": "Responds immediately with the final AI summary and synchronized records to the Nalathunai frontend"
+        },
+        "isTrigger": false,
+        "isPrimaryTrigger": false,
+        "inputs": {
+          "respondWith": "JSON",
+          "responseCode": 200,
+          "responseBody": "={{JSON.stringify($('code-format-response-06').item.json)}}"
+        },
+        "connectedHandles": [],
+        "isFormWait": false,
+        "isTimerWait": false,
+        "isWebhookWait": false
+      },
+      "width": 220,
+      "height": 93,
+      "positionAbsolute": {
+        "x": 1840,
+        "y": 320
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "e-get-records-to-ai-agent",
+      "source": "supabase-get-records-04",
+      "target": "ai-summarization-agent-05",
+      "type": "custom",
+      "data": {}
+    },
+    {
+      "id": "e-ai-agent-to-format",
+      "source": "ai-summarization-agent-05",
+      "target": "code-format-response-06",
+      "type": "custom",
+      "data": {}
+    },
+    {
+      "id": "e-format-to-respond",
+      "source": "code-format-response-06",
+      "target": "webhook-respond-summary-07",
+      "type": "custom",
+      "data": {}
+    },
+    {
+      "source": "webhook-patient-trigger-01",
+      "sourceHandle": null,
+      "target": "supabase-get-records-04",
+      "targetHandle": null,
+      "type": "custom",
+      "data": {},
+      "id": "reactflow__edge-webhook-patient-trigger-01-supabase-get-records-04"
+    }
+  ]
+}

@@ -5,6 +5,7 @@ import { StatusBadge } from '../components/StatusBadge';
 import { Modal } from '../components/Modal';
 import { consentService } from '../services/consentService';
 import { activityService } from '../services/activityService';
+import { hospitalDoctorService } from '../services/hospitalDoctorService';
 import {
   ShieldCheck,
   ShieldAlert,
@@ -48,6 +49,11 @@ export const ConsentPage = () => {
     if (!approvalModalRequest) return;
     try {
       await consentService.approveConsent(approvalModalRequest.id);
+      hospitalDoctorService.syncPatientApproval(
+        approvalModalRequest.requesterName,
+        approvalModalRequest.hospitalName,
+        approvalModalRequest
+      );
       await activityService.logEvent(
         'Approved Access Request',
         `You granted record access to ${approvalModalRequest.hospitalName} (${approvalModalRequest.requesterName}).`,

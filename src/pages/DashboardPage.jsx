@@ -1,32 +1,45 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Card } from '../components/Card';
+import { useWebhookSync } from '../context/WebhookContext';
 import { Button } from '../components/Button';
 import { StatusBadge } from '../components/StatusBadge';
 import { Modal } from '../components/Modal';
 import { recordService } from '../services/recordService';
 import { consentService } from '../services/consentService';
 import { activityService } from '../services/activityService';
+import { supabaseService } from '../services/supabaseService';
 import {
   FolderHeart,
   ShieldAlert,
   ShieldCheck,
   History,
   FilePlus2,
-  ChevronRight,
   Eye,
   Download,
   ArrowUpRight,
   Clock,
   Sparkles,
+  Bot,
   Building2,
-  Calendar,
+  RefreshCw,
+  Wifi,
+  X,
+  ExternalLink,
 } from 'lucide-react';
 
 export const DashboardPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const {
+    isSyncing,
+    syncResult,
+    webhookUrl,
+    triggerManualSync,
+    hasNotifiedLaunch,
+    dismissLaunchNotice,
+    openInspector,
+  } = useWebhookSync();
 
   const [records, setRecords] = useState([]);
   const [activeConsents, setActiveConsents] = useState([]);
@@ -65,8 +78,59 @@ export const DashboardPage = () => {
     return 'Good evening';
   };
 
+  const clinicalSummary = useMemo(() => {
+    return supabaseService.generateClinicalSummary(records);
+  }, [records]);
+
   return (
     <div className="space-y-8">
+      {/* Webhook Auto-Sync Launch Banner */}
+      {hasNotifiedLaunch && syncResult?.success && (
+        <div className="relative flex items-start gap-3.5 p-4 sm:p-5 bg-gradient-to-r from-[#E8F0E4] to-[#F0F5EC] border border-[#C2D6B8] rounded-xl shadow-[0_1px_4px_rgba(60,80,50,0.06)] animate-[fadeIn_0.4s_ease-out]">
+          <div className="p-2 rounded-lg bg-[#D2E4C8] text-[#3A5131] shrink-0 mt-0.5">
+            <Wifi size={18} strokeWidth={1.75} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-[#2F3D27]">
+              SNS Workbench Webhook Connected on Launch
+            </p>
+            <p className="text-xs text-[#5A6E4E] mt-0.5 leading-relaxed">
+              Auto-handshake with{' '}
+              <code className="text-[10.5px] font-mono bg-[#C8DAC0] px-1.5 py-0.5 rounded text-[#2A3C22]">
+                {webhookUrl}
+              </code>{' '}
+              completed successfully in{' '}
+              <strong>{syncResult.latencyMs}ms</strong>.
+              Status: <strong>{syncResult.status}</strong> · Mode: <strong>{syncResult.mode}</strong>
+            </p>
+            <div className="flex items-center gap-3 mt-2.5">
+              <button
+                onClick={openInspector}
+                className="inline-flex items-center gap-1 text-[11px] font-medium text-[#3A5131] underline underline-offset-2 decoration-[#A2C393] hover:decoration-[#3A5131] transition-colors"
+              >
+                <ExternalLink size={11} />
+                Inspect Response
+              </button>
+              <button
+                onClick={() => triggerManualSync()}
+                disabled={isSyncing}
+                className="inline-flex items-center gap-1 text-[11px] font-medium text-[#3A5131] underline underline-offset-2 decoration-[#A2C393] hover:decoration-[#3A5131] transition-colors disabled:opacity-50"
+              >
+                <RefreshCw size={11} className={isSyncing ? 'animate-spin' : ''} />
+                {isSyncing ? 'Syncing…' : 'Re-trigger'}
+              </button>
+            </div>
+          </div>
+          <button
+            onClick={dismissLaunchNotice}
+            className="p-1 rounded-md text-[#5A6E4E] hover:bg-[#C2D6B8]/40 transition-colors shrink-0"
+            aria-label="Dismiss"
+          >
+            <X size={14} />
+          </button>
+        </div>
+      )}
+
       {/* Editorial Page Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-5 pb-6 border-b border-[#E5DDD0]">
         <div>
@@ -209,6 +273,50 @@ export const DashboardPage = () => {
           </Button>
         </div>
       )}
+
+      {/* AI Health Summary & Assistant Guidance Card */}
+      <div className="bg-gradient-to-br from-[#FAF7F2] to-white border border-[#E5DDD0] rounded-2xl p-6 shadow-xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#EAE3D5] pb-4">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-[#0f5257] text-white flex items-center justify-center shadow-xs">
+              <Sparkles size={16} />
+            </div>
+            <div>
+              <h2 className="text-sm font-bold text-[#2F2D29]">AI Health Summary &amp; Biomarker Synthesis</h2>
+              <p className="text-xs text-[#787469]">
+                Live Gemini synthesis from connected hospital partition records
+              </p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => window.dispatchEvent(new CustomEvent('open_nalathunai_chatbot', { detail: { query: 'Summarize my overall health status' } }))}
+            className="py-2 px-3.5 bg-[#0f5257] hover:bg-[#0c4246] text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 self-start sm:self-auto shadow-xs transition-colors"
+          >
+            <Bot size={14} /> Open AI Medical Assistant
+          </button>
+        </div>
+
+        <p className="text-xs text-[#686358] leading-relaxed">
+          {clinicalSummary?.clinicalOverview}
+        </p>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1 text-xs">
+          <div className="p-3 bg-white border border-[#E5DDD0] rounded-xl space-y-1">
+            <span className="text-[10px] font-mono uppercase tracking-wider text-[#8C877C] block font-medium">Glycemic Control</span>
+            <p className="text-[#2F2D29] font-medium leading-snug">{clinicalSummary?.vitalsAssessment?.glycemicControl}</p>
+          </div>
+          <div className="p-3 bg-white border border-[#E5DDD0] rounded-xl space-y-1">
+            <span className="text-[10px] font-mono uppercase tracking-wider text-[#8C877C] block font-medium">Cardiovascular &amp; Lipids</span>
+            <p className="text-[#2F2D29] font-medium leading-snug">{clinicalSummary?.vitalsAssessment?.cardiovascular}</p>
+          </div>
+          <div className="p-3 bg-white border border-[#E5DDD0] rounded-xl space-y-1">
+            <span className="text-[10px] font-mono uppercase tracking-wider text-[#8C877C] block font-medium">BMI Metric</span>
+            <p className="text-[#2F2D29] font-medium leading-snug">{clinicalSummary?.vitalsAssessment?.bmiStatus}</p>
+          </div>
+        </div>
+      </div>
 
       {/* Main content 2-column grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">

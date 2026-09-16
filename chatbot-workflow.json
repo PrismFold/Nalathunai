@@ -1,0 +1,249 @@
+{
+  "_platform": "agentbuilder",
+  "_version": 1,
+  "nodes": [
+    {
+      "id": "webhook-trigger",
+      "type": "webhook",
+      "position": {
+        "x": 300,
+        "y": 300
+      },
+      "data": {
+        "label": "Chatbot Webhook Trigger",
+        "toolId": "webhook",
+        "toolData": {
+          "id": "webhook",
+          "displayName": "Webhook Trigger",
+          "category": "Input / Output",
+          "icon": "webhook",
+          "description": "Receives chat queries from Nalathunai frontend",
+          "inputSchemaJSON": {
+            "type": "object",
+            "properties": {
+              "path": {
+                "type": "string"
+              },
+              "method": {
+                "type": "string",
+                "enum": [
+                  "GET",
+                  "POST",
+                  "PUT",
+                  "DELETE"
+                ],
+                "default": "POST"
+              },
+              "responseMode": {
+                "type": "string",
+                "enum": [
+                  "onReceived",
+                  "lastNode",
+                  "respondWithNode"
+                ],
+                "default": "respondWithNode"
+              },
+              "authentication": {
+                "type": "string",
+                "enum": [
+                  "none",
+                  "jwtAuth"
+                ],
+                "default": "none"
+              },
+              "options": {
+                "type": "object",
+                "properties": {
+                  "allowedOrigins": {
+                    "type": "string",
+                    "default": "*"
+                  }
+                }
+              }
+            },
+            "required": [
+              "path"
+            ]
+          }
+        },
+        "isTrigger": true,
+        "isPrimaryTrigger": true,
+        "inputs": {
+          "path": "chatbot",
+          "method": "POST",
+          "responseMode": "respondWithNode",
+          "authentication": "none",
+          "options": {
+            "allowedOrigins": "*"
+          }
+        },
+        "connectedHandles": [],
+        "lastTestOutput": {
+          "items": []
+        },
+        "executionStatus": "success",
+        "isFormWait": false,
+        "isTimerWait": false,
+        "isWebhookWait": false
+      },
+      "width": 220,
+      "height": 99,
+      "positionAbsolute": {
+        "x": 300,
+        "y": 300
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "llm-agent",
+      "type": "action",
+      "position": {
+        "x": 600,
+        "y": 300
+      },
+      "data": {
+        "label": "AI Medical Guide",
+        "toolId": "llm-agent-execute",
+        "toolData": {
+          "id": "llm-agent-execute",
+          "displayName": "LLM Node",
+          "category": "AI / LLM",
+          "provider": "llmagent",
+          "operation": "execute",
+          "icon": "smart_toy",
+          "description": "Synthesizes clinical metrics (Glucose, HbA1c, Cholesterol, BMI, Diagnoses) into a structured summary"
+        },
+        "isTrigger": false,
+        "isPrimaryTrigger": false,
+        "inputs": {
+          "provider": "gemini",
+          "model": "gemini-2.5-flash",
+          "temperature": 0.5,
+          "systemPrompt": "You are the Nalathunai AI Medical Guide & Assistant. Analyze the user query and provide clinical biomarker explanations, prescribe medication summaries, or platform guidance based on the patient's records.",
+          "promptSource": "define",
+          "question": "Patient query: {{$('webhook-trigger').item.json.body.query}}. Patient records count: {{$('webhook-trigger').item.json.body.recordsCount}}. Respond in valid JSON format: {\"chatAnswer\": \"...\", \"suggestedFollowUps\": [\"...\"]}"
+        },
+        "connectedHandles": [],
+        "isFormWait": false,
+        "isTimerWait": false,
+        "isWebhookWait": false
+      },
+      "width": 220,
+      "height": 93,
+      "positionAbsolute": {
+        "x": 600,
+        "y": 300
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "code-formatter",
+      "type": "action",
+      "position": {
+        "x": 900,
+        "y": 300
+      },
+      "data": {
+        "label": "Format Chatbot Response",
+        "toolId": "code.execute",
+        "toolData": {
+          "id": "code.execute",
+          "displayName": "Code",
+          "category": "Data Processing",
+          "provider": "code",
+          "operation": "execute",
+          "icon": "💻",
+          "description": "Constructs the unified response containing created row, fetched records, and AI clinical summary"
+        },
+        "isTrigger": false,
+        "isPrimaryTrigger": false,
+        "inputs": {
+          "language": "javascript",
+          "mode": "all",
+          "code": "const triggerBody = $('webhook-trigger').item.json.body || {};\nconst llmRaw = $('llm-agent').item.json || {};\nlet parsedLLM = llmRaw;\nif (typeof llmRaw === 'string') {\n  try {\n    parsedLLM = JSON.parse(llmRaw);\n  } catch (e) {\n    parsedLLM = { chatAnswer: llmRaw, suggestedFollowUps: ['How do I approve or revoke doctor consent?'] };\n  }\n}\nreturn [{ ...parsedLLM, success: true, mode: 'ai_chatbot', timestamp: new Date().toISOString() }];"
+        },
+        "connectedHandles": [],
+        "isFormWait": false,
+        "isTimerWait": false,
+        "isWebhookWait": false
+      },
+      "width": 220,
+      "height": 93,
+      "positionAbsolute": {
+        "x": 900,
+        "y": 300
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "webhook-respond",
+      "type": "action",
+      "position": {
+        "x": 1200,
+        "y": 300
+      },
+      "data": {
+        "label": "Webhook Response",
+        "toolId": "respondToWebhook",
+        "toolData": {
+          "id": "respondToWebhook",
+          "displayName": "Webhook Response",
+          "category": "Input / Output",
+          "icon": "reply",
+          "description": "Responds immediately with the final AI summary and synchronized records to the Nalathunai frontend"
+        },
+        "isTrigger": false,
+        "isPrimaryTrigger": false,
+        "inputs": {
+          "respondWith": "JSON",
+          "responseCode": 200,
+          "responseBody": "={{JSON.stringify($('code-formatter').item.json)}}"
+        },
+        "connectedHandles": [],
+        "isFormWait": false,
+        "isTimerWait": false,
+        "isWebhookWait": false
+      },
+      "width": 220,
+      "height": 93,
+      "positionAbsolute": {
+        "x": 1200,
+        "y": 300
+      },
+      "selected": false,
+      "dragging": false
+    }
+  ],
+  "edges": [
+    {
+      "id": "reactflow__edge-webhook-trigger-llm-agent",
+      "source": "webhook-trigger",
+      "sourceHandle": null,
+      "target": "llm-agent",
+      "targetHandle": null,
+      "type": "custom",
+      "data": {}
+    },
+    {
+      "id": "reactflow__edge-llm-agent-code-formatter",
+      "source": "llm-agent",
+      "sourceHandle": null,
+      "target": "code-formatter",
+      "targetHandle": null,
+      "type": "custom",
+      "data": {}
+    },
+    {
+      "id": "reactflow__edge-code-formatter-webhook-respond",
+      "source": "code-formatter",
+      "sourceHandle": null,
+      "target": "webhook-respond",
+      "targetHandle": null,
+      "type": "custom",
+      "data": {}
+    }
+  ]
+}

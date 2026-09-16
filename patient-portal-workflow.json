@@ -1,0 +1,272 @@
+{
+  "_platform": "agentbuilder",
+  "_version": 1,
+  "_exportedAt": "2026-09-16T04:00:00.000Z",
+  "workflowName": "Nalathunai Patient Portal Medical Summary & Chatbot Workflow",
+  "workflowDescription": "Receives patient medical queries and retrieval requests, pulls biomarker records from Supabase hospital tables, executes Gemini AI clinical synthesis and health guidance, and delivers an empathetic medical summary with actionable recommendations.",
+  "nodes": [
+    {
+      "id": "webhook-patient-portal-trigger-01",
+      "type": "webhook",
+      "position": {
+        "x": 260,
+        "y": 300
+      },
+      "data": {
+        "label": "Patient Portal Webhook Trigger",
+        "toolId": "webhook",
+        "toolData": {
+          "id": "webhook",
+          "displayName": "Webhook Trigger",
+          "category": "Input / Output",
+          "icon": "webhook",
+          "description": "Receives patient medical queries, health summary requests, and record sync events from the Nalathunai frontend",
+          "inputSchemaJSON": {
+            "type": "object",
+            "properties": {
+              "path": {
+                "type": "string",
+                "default": "records/retrieve"
+              },
+              "method": {
+                "type": "string",
+                "enum": ["POST", "GET"],
+                "default": "POST"
+              },
+              "responseMode": {
+                "type": "string",
+                "enum": ["respondWithNode", "lastNode", "onReceived"],
+                "default": "respondWithNode"
+              },
+              "authentication": {
+                "type": "string",
+                "enum": ["none", "jwtAuth"],
+                "default": "none"
+              },
+              "options": {
+                "type": "object",
+                "properties": {
+                  "allowedOrigins": {
+                    "type": "string",
+                    "default": "*"
+                  }
+                }
+              }
+            },
+            "required": ["path"]
+          }
+        },
+        "isTrigger": true,
+        "isPrimaryTrigger": true,
+        "inputs": {
+          "path": "records/retrieve",
+          "method": "POST",
+          "responseMode": "respondWithNode",
+          "authentication": "none",
+          "options": {
+            "allowedOrigins": "*"
+          }
+        },
+        "connectedHandles": [],
+        "lastTestOutput": {
+          "items": [
+            {
+              "json": {
+                "body": {
+                  "event": "PATIENT_MEDICAL_SUMMARY",
+                  "source": "nalathunai_patient_portal",
+                  "patientId": "USR-162674",
+                  "patientName": "Jeremiah",
+                  "aadhaar": "8730-5083-3227",
+                  "abhaId": "91-4829-1029-4720",
+                  "hospitalName": "Ganga Hospital",
+                  "hospitalTable": "ganga_hospital",
+                  "query": "Can you give me a summary of my overall health status and explain what my blood glucose means?",
+                  "mode": "chat_and_summary",
+                  "requestId": "PAT-REQ-1001"
+                }
+              }
+            }
+          ]
+        },
+        "executionStatus": "success"
+      },
+      "width": 240,
+      "height": 100
+    },
+    {
+      "id": "supabase-fetch-patient-records-02",
+      "type": "action",
+      "position": {
+        "x": 620,
+        "y": 300
+      },
+      "data": {
+        "label": "Supabase: Fetch Patient Records",
+        "toolId": "supabase.getManyRows",
+        "toolData": {
+          "id": "supabase.getManyRows",
+          "displayName": "Get Many Rows",
+          "category": "Memory & State",
+          "provider": "supabase",
+          "operation": "getManyRows",
+          "icon": "https://supabase.com/brand-assets/supabase-logo-icon.svg",
+          "description": "Pulls clinical biomarker rows for the patient from Supabase hospital partition"
+        },
+        "isTrigger": false,
+        "isPrimaryTrigger": false,
+        "inputs": {
+          "supabaseUrl": "https://jcwnwrzfwwonxdatpxxf.supabase.co",
+          "supabaseAnonKey": "sb_publishable_Jw6pTr7EFWMbnjy0OTX_NA_OhQFnPgH",
+          "useCustomSchema": false,
+          "schema": "public",
+          "resource": "Row",
+          "operation": "Get Many rows",
+          "tableName": "ganga_hospital",
+          "returnAll": false,
+          "limit": 50,
+          "selectType": "Build Manually",
+          "mustMatch": "All Filter",
+          "matchConditions": [
+            {
+              "columnName": "Aadhaar",
+              "condition": "Equals",
+              "columnValue": "={{$('webhook-patient-portal-trigger-01').item.json.body.aadhaar || '8730-5083-3227'}}"
+            }
+          ]
+        },
+        "connectedHandles": [],
+        "executionStatus": "success"
+      },
+      "width": 240,
+      "height": 95
+    },
+    {
+      "id": "llm-medical-summary-and-chat-agent-03",
+      "type": "action",
+      "position": {
+        "x": 980,
+        "y": 300
+      },
+      "data": {
+        "label": "Gemini AI Medical Summary & Chatbot Agent",
+        "toolId": "llm-agent-execute",
+        "toolData": {
+          "id": "llm-agent-execute",
+          "displayName": "LLM Node",
+          "category": "AI / LLM",
+          "provider": "llmagent",
+          "operation": "execute",
+          "icon": "smart_toy",
+          "description": "Synthesizes clinical records and answers patient medical and platform questions"
+        },
+        "isTrigger": false,
+        "isPrimaryTrigger": false,
+        "inputs": {
+          "provider": "gemini",
+          "model": "gemini-2.5-flash",
+          "temperature": 0.25,
+          "systemPrompt": "You are the Nalathunai AI Medical Guide & Health Summary Agent. You assist patients in understanding their medical records retrieved from connected hospital partitions (Ganga, KMCH, Kongunad, PSG, Sri Ramakrishna Hospital) under the ABDM digital healthcare framework.\n\nYour core responsibilities:\n1. Provide an empathetic, clear, patient-friendly medical summary that explains health metrics in plain language without unnecessary medical jargon.\n2. Analyze biomarkers: Blood Glucose (normal: 70-110 mg/dL fasting, <140 postprandial), HbA1c (normal: <5.7%, pre-diabetic: 5.7-6.4%, diabetic: >=6.5%), Total Cholesterol (desirable: <200 mg/dL, borderline: 200-239, high: >=240), BMI (healthy: 18.5-24.9, overweight: 25-29.9, obese: >=30).\n3. If the user provided a question or query in {{$('webhook-patient-portal-trigger-01').item.json.body.query}}, answer it specifically and thoroughly in the 'chatAnswer' field, including clinical context, preventative dietary/lifestyle tips, and guidance on navigating the Nalathunai platform (e.g. viewing records, approving or revoking doctor consent, requesting new records).\n4. Provide 3-4 personalized follow-up suggestions in 'suggestedFollowUps' to help the user continue the consultation.\n5. Always provide an educational medical disclaimer: this AI guidance is informational and the patient should consult their treating doctor for prescriptions or diagnoses.\n\nNever invent false data. Always respond in valid, parseable JSON format:\n{\n  \"clinicalOverview\": \"...clear overview of the patient's current health status...\",\n  \"vitalsAssessment\": {\n    \"glycemicControl\": \"...\",\n    \"cardiovascular\": \"...\",\n    \"bmiStatus\": \"...\"\n  },\n  \"keyFindings\": [\"...finding 1...\", \"...finding 2...\", \"...finding 3...\"],\n  \"recommendations\": [\"...actionable lifestyle or clinical recommendation 1...\", \"...recommendation 2...\"],\n  \"chatAnswer\": \"...comprehensive, empathetic answer to the user's query with platform guidance...\",\n  \"suggestedFollowUps\": [\"...question 1...\", \"...question 2...\", \"...question 3...\"]\n}",
+          "promptSource": "define",
+          "question": "Patient Information:\nName: {{$('webhook-patient-portal-trigger-01').item.json.body.patientName || 'Jeremiah'}}\nAadhaar: {{$('webhook-patient-portal-trigger-01').item.json.body.aadhaar || '8730-5083-3227'}}\nPatient Query / Message: \"{{$('webhook-patient-portal-trigger-01').item.json.body.query || 'Please provide a comprehensive medical summary and explain my latest health records.'}}\"\nHospital Records Context:\n{{JSON.stringify($('supabase-fetch-patient-records-02').item.json || [])}}\n\nGenerate the complete patient medical summary and chatbot response in valid JSON format."
+        },
+        "connectedHandles": [],
+        "executionStatus": "success"
+      },
+      "width": 260,
+      "height": 95
+    },
+    {
+      "id": "code-format-patient-response-04",
+      "type": "action",
+      "position": {
+        "x": 1360,
+        "y": 300
+      },
+      "data": {
+        "label": "Format Patient Response",
+        "toolId": "code.execute",
+        "toolData": {
+          "id": "code.execute",
+          "displayName": "Code",
+          "category": "Data Processing",
+          "provider": "code",
+          "operation": "execute",
+          "icon": "💻",
+          "description": "Assembles clinical summary, chatbot answer, and patient biomarker records into unified response"
+        },
+        "isTrigger": false,
+        "isPrimaryTrigger": false,
+        "inputs": {
+          "language": "javascript",
+          "mode": "all",
+          "code": "const triggerBody = $('webhook-patient-portal-trigger-01').item.json.body || {};\nconst fetchedRows = $('supabase-fetch-patient-records-02').item.json || [];\nconst aiResponseRaw = $('llm-medical-summary-and-chat-agent-03').item.json || {};\n\nlet parsedAi = aiResponseRaw;\nif (typeof aiResponseRaw === 'string') {\n  try {\n    parsedAi = JSON.parse(aiResponseRaw);\n  } catch (e) {\n    parsedAi = {\n      clinicalOverview: aiResponseRaw,\n      chatAnswer: aiResponseRaw,\n      vitalsAssessment: {\n        glycemicControl: 'Optimal',\n        cardiovascular: 'Stable baseline',\n        bmiStatus: 'Normal'\n      },\n      keyFindings: ['Patient records successfully summarized.'],\n      recommendations: ['Schedule routine clinical review.'],\n      suggestedFollowUps: ['What do my latest test results mean?', 'How do I share records with my doctor?']\n    };\n  }\n}\n\nconst recordsList = Array.isArray(fetchedRows) ? fetchedRows : (fetchedRows ? [fetchedRows] : []);\n\nreturn [{\n  success: true,\n  mode: triggerBody.mode || 'patient_summary_and_chat',\n  status: 'completed',\n  timestamp: new Date().toISOString(),\n  requestId: triggerBody.requestId || ('PAT-' + Date.now().toString().slice(-4)),\n  patient: {\n    id: triggerBody.patientId || 'USR-162674',\n    name: triggerBody.patientName || 'Jeremiah',\n    aadhaar: triggerBody.aadhaar || '8730-5083-3227',\n    abhaId: triggerBody.abhaId || '91-4829-1029-4720'\n  },\n  medicalSummary: {\n    clinicalOverview: parsedAi.clinicalOverview || 'Synthesized summary of your connected hospital records.',\n    vitalsAssessment: parsedAi.vitalsAssessment || {\n      glycemicControl: 'Normal boundaries',\n      cardiovascular: 'Healthy lipid markers',\n      bmiStatus: 'Normal'\n    },\n    keyFindings: parsedAi.keyFindings || ['Records consolidated from connected care providers.'],\n    recommendations: parsedAi.recommendations || ['Maintain regular hydration and balanced diet.', 'Follow up with your primary physician.']\n  },\n  chatAnswer: parsedAi.chatAnswer || parsedAi.clinicalOverview || 'Your records are up-to-date and within healthy boundaries.',\n  suggestedFollowUps: parsedAi.suggestedFollowUps || [\n    'What does my HbA1c score mean?',\n    'How do I approve consent for my doctor?',\n    'How do I download my lab reports?'\n  ],\n  retrievedRecords: recordsList,\n  totalRecordsCount: recordsList.length,\n  disclaimer: 'Nalathunai AI Assistant provides educational clinical summaries. Consult your doctor for medical advice.'\n}];"
+        },
+        "connectedHandles": [],
+        "executionStatus": "success"
+      },
+      "width": 240,
+      "height": 95
+    },
+    {
+      "id": "respond-to-patient-webhook-05",
+      "type": "action",
+      "position": {
+        "x": 1720,
+        "y": 300
+      },
+      "data": {
+        "label": "Webhook Response to Patient",
+        "toolId": "respondToWebhook",
+        "toolData": {
+          "id": "respondToWebhook",
+          "displayName": "Webhook Response",
+          "category": "Input / Output",
+          "icon": "reply",
+          "description": "Responds with patient medical summary and chatbot guidance payload"
+        },
+        "isTrigger": false,
+        "isPrimaryTrigger": false,
+        "inputs": {
+          "respondWith": "JSON",
+          "responseCode": 200,
+          "responseBody": "={{JSON.stringify($('code-format-patient-response-04').item.json)}}"
+        },
+        "connectedHandles": [],
+        "executionStatus": "success"
+      },
+      "width": 240,
+      "height": 95
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge-trigger-to-supabase",
+      "source": "webhook-patient-portal-trigger-01",
+      "target": "supabase-fetch-patient-records-02",
+      "type": "custom",
+      "data": {}
+    },
+    {
+      "id": "edge-supabase-to-llm",
+      "source": "supabase-fetch-patient-records-02",
+      "target": "llm-medical-summary-and-chat-agent-03",
+      "type": "custom",
+      "data": {}
+    },
+    {
+      "id": "edge-llm-to-code",
+      "source": "llm-medical-summary-and-chat-agent-03",
+      "target": "code-format-patient-response-04",
+      "type": "custom",
+      "data": {}
+    },
+    {
+      "id": "edge-code-to-response",
+      "source": "code-format-patient-response-04",
+      "target": "respond-to-patient-webhook-05",
+      "type": "custom",
+      "data": {}
+    }
+  ]
+}

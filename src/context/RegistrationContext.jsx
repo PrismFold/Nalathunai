@@ -4,12 +4,15 @@ const REG_STORAGE_KEY = 'nalathunai_reg_temp_state';
 
 const initialRegState = {
   aadhaarNumber: '',
+  phoneNumber: '',
   aadhaarVerified: false,
+  verifiedDemographics: null,
   personalDetails: {
     fullName: '',
     dateOfBirth: '',
-    bloodGroup: 'A+',
+    bloodGroup: 'O+',
     email: '',
+    mobile: '',
   },
   detailsCompleted: false,
   emailVerified: false,
@@ -36,11 +39,21 @@ export const RegistrationProvider = ({ children }) => {
     }
   }, [regState]);
 
-  const setAadhaarVerified = (aadhaarNumber) => {
+  const setAadhaarVerified = (aadhaarNumber, phoneNumber, verifiedDemographics = null) => {
     setRegState((prev) => ({
       ...prev,
       aadhaarNumber,
+      phoneNumber,
       aadhaarVerified: true,
+      verifiedDemographics,
+      personalDetails: {
+        ...prev.personalDetails,
+        fullName: verifiedDemographics?.name || prev.personalDetails.fullName,
+        dateOfBirth: verifiedDemographics?.dateOfBirth || prev.personalDetails.dateOfBirth,
+        bloodGroup: verifiedDemographics?.bloodGroup || prev.personalDetails.bloodGroup,
+        email: verifiedDemographics?.email || prev.personalDetails.email,
+        mobile: phoneNumber || prev.personalDetails.mobile,
+      }
     }));
   };
 

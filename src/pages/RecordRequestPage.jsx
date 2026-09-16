@@ -15,7 +15,7 @@ import {
   Cpu,
   ArrowRight,
   FileCheck2,
-  Lock,
+  Sparkles,
 } from 'lucide-react';
 
 export const RecordRequestPage = () => {
@@ -24,12 +24,21 @@ export const RecordRequestPage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
 
-  const [hospitalName, setHospitalName] = useState('ABC Hospital');
+  const [latestSummary, setLatestSummary] = useState(null);
+  const [retrievedCount, setRetrievedCount] = useState(0);
+
+  const [hospitalName, setHospitalName] = useState('Ganga Hospital');
   const [recordType, setRecordType] = useState('Lab Reports');
   const [dateRange, setDateRange] = useState('01 Aug 2026');
   const [reason, setReason] = useState('Medical Consultation & Second Opinion');
 
-  const hospitalOptions = ['ABC Hospital', 'PSG Hospital', 'City Hospital', 'Apex Diagnostic Center', 'Kovai Care Clinic'];
+  const hospitalOptions = [
+    'Ganga Hospital',
+    'KMCH Hospital',
+    'Kongunad Hospital',
+    'PSG Hospital',
+    'Sri Ramakrishna Hospital'
+  ];
   const recordTypeOptions = ['Lab Reports', 'Prescriptions', 'Consultations', 'Scans', 'All Medical Records'];
 
   const loadRequests = async () => {
@@ -50,14 +59,19 @@ export const RecordRequestPage = () => {
     e.preventDefault();
     setSubmitting(true);
     setSuccessMessage('');
+    setLatestSummary(null);
     try {
-      const newReq = await recordService.submitRecordRequest({ hospitalName, recordType, dateRange, reason });
+      const result = await recordService.submitRecordRequest({ hospitalName, recordType, dateRange, reason });
       await activityService.logEvent(
         'Submitted Retrieval Request',
-        `Requested ${recordType} from ${hospitalName} (${dateRange}). Status: Waiting for Consent`,
+        `Requested ${recordType} from ${hospitalName} (${dateRange}). Status: Retrieved`,
         'request', 'DownloadCloud'
       );
-      setSuccessMessage(`Record request created for ${hospitalName}. Waiting for Consent.`);
+      setSuccessMessage(`Record retrieved from ${hospitalName} Supabase partition.`);
+      if (result.aiSummary) {
+        setLatestSummary(result.aiSummary);
+        setRetrievedCount(result.recordsRetrieved || 0);
+      }
       setReason('');
       await loadRequests();
     } catch (err) {
@@ -116,6 +130,40 @@ export const RecordRequestPage = () => {
                   <span>Record Request Created</span>
                 </div>
                 <div className="text-[11px] text-[#425938]">{successMessage}</div>
+              </div>
+            )}
+
+            {latestSummary && (
+              <div className="p-4 bg-gradient-to-br from-[#F4EFE6] to-[#FAF7F2] border border-[#D9CDB8] rounded-xl text-xs space-y-3 shadow-xs">
+                <div className="flex items-center justify-between pb-2 border-b border-[#E2D8C3]">
+                  <span className="flex items-center gap-1.5 font-semibold text-[#2F2D29] text-[13px]">
+                    <Sparkles size={14} className="text-[#865F1D]" />
+                    AI Clinical Synthesis (Immediate)
+                  </span>
+                  <span className="text-[10px] font-mono text-[#3A5131] bg-[#E8F0E4] px-2 py-0.5 rounded-md border border-[#C2D6B8]">
+                    {retrievedCount} Supabase Records Synced
+                  </span>
+                </div>
+                <p className="text-[#4F4A3E] leading-relaxed text-[11.5px]">
+                  {latestSummary.clinicalOverview}
+                </p>
+                {latestSummary.vitalsAssessment && (
+                  <div className="space-y-1.5 pt-1">
+                    <div className="text-[10px] font-mono uppercase tracking-wider text-[#8C877C] font-semibold">
+                      Vitals Assessment
+                    </div>
+                    <div className="grid grid-cols-1 gap-1.5 text-[11px]">
+                      <div className="p-2 bg-[#FAF7F2] rounded-lg border border-[#E5DDD0]">
+                        <span className="font-semibold text-[#2F2D29]">Glycemic: </span>
+                        <span className="text-[#5D6454]">{latestSummary.vitalsAssessment.glycemicControl}</span>
+                      </div>
+                      <div className="p-2 bg-[#FAF7F2] rounded-lg border border-[#E5DDD0]">
+                        <span className="font-semibold text-[#2F2D29]">Cardiovascular: </span>
+                        <span className="text-[#5D6454]">{latestSummary.vitalsAssessment.cardiovascular}</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 

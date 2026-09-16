@@ -63,3 +63,24 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #A7AA91;
 }
+
+/* Butter-smooth page transitions */
+html {
+  scroll-behavior: smooth;
+}
+
+@keyframes pageSwitchFade {
+  0% {
+    opacity: 0.88;
+    transform: translateY(3px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-view-enter {
+  animation: pageSwitchFade 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: opacity, transform;
+}

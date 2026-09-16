@@ -63,13 +63,19 @@ export const LandingPage = () => {
             </button>
           </nav>
 
-          {/* Action Right */}
-          <div className="hidden md:flex items-center gap-4">
+          {/* Action Right: Multi-Portal Quick Entry */}
+          <div className="hidden md:flex items-center gap-3">
+            <button
+              onClick={() => navigate('/login')}
+              className="text-xs font-semibold px-3 py-1.5 rounded-lg border border-[#D5CDBC] text-[#2F2D29] hover:bg-[#EAE3D5] transition-colors"
+            >
+              Doctor &amp; Hospital Portals
+            </button>
             <button
               onClick={() => navigate(isAuthenticated ? '/dashboard' : '/login')}
-              className="text-xs font-semibold text-[#2F2D29] hover:text-[#5D6454] transition-colors"
+              className="text-xs font-semibold px-3.5 py-1.5 rounded-lg bg-[#2F2D29] text-[#F7F3EA] hover:bg-[#1f1e1b] transition-colors"
             >
-              {isAuthenticated ? 'Dashboard' : 'Login'}
+              {isAuthenticated ? 'Dashboard' : 'Sign In'}
             </button>
           </div>
 
@@ -140,13 +146,55 @@ export const LandingPage = () => {
                 onClick={() => navigate(isAuthenticated ? '/dashboard' : '/login')}
                 variant="primary"
               >
-                Get Started
+                Access Patient Portal
               </Button>
               <button
-                onClick={() => scrollToSection('how-it-works')}
-                className="text-xs font-medium text-[#686358] hover:text-[#2F2D29] flex items-center gap-1.5 transition-colors py-2 px-3"
+                onClick={() => navigate('/login')}
+                className="text-xs font-semibold text-[#0f5257] bg-[#E8F0EE] hover:bg-[#D5E6E3] px-3.5 py-2.5 rounded-lg border border-[#BCD9D4] flex items-center gap-1.5 transition-colors"
               >
-                Explore Nalathunai <ArrowRight size={14} className="text-[#5D6454]" />
+                Doctor &amp; Hospital Sign In <ArrowRight size={14} />
+              </button>
+            </div>
+
+            {/* Direct Portal Switcher Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+              <button
+                onClick={() => navigate('/login')}
+                className="p-3.5 bg-[#FAF7F2] hover:bg-white border border-[#E5DDD0] hover:border-[#0f5257] rounded-xl text-left transition-all group shadow-xs"
+              >
+                <div className="text-xs font-bold text-[#2F2D29] group-hover:text-[#0f5257] flex items-center justify-between">
+                  <span>Patient Portal</span>
+                  <ArrowRight size={13} className="text-stone-400 group-hover:text-[#0f5257] transition-transform group-hover:translate-x-0.5" />
+                </div>
+                <p className="text-[11px] text-[#787469] mt-1">
+                  Consent records, manage digital health wallet &amp; OTP access
+                </p>
+              </button>
+
+              <button
+                onClick={() => navigate('/login')}
+                className="p-3.5 bg-[#FAF7F2] hover:bg-white border border-[#E5DDD0] hover:border-[#0f5257] rounded-xl text-left transition-all group shadow-xs"
+              >
+                <div className="text-xs font-bold text-[#2F2D29] group-hover:text-[#0f5257] flex items-center justify-between">
+                  <span>Doctor Portal</span>
+                  <ArrowRight size={13} className="text-stone-400 group-hover:text-[#0f5257] transition-transform group-hover:translate-x-0.5" />
+                </div>
+                <p className="text-[11px] text-[#787469] mt-1">
+                  Search patients, request file consent &amp; view clinical summaries
+                </p>
+              </button>
+
+              <button
+                onClick={() => navigate('/login')}
+                className="p-3.5 bg-[#FAF7F2] hover:bg-white border border-[#E5DDD0] hover:border-[#1e3a5f] rounded-xl text-left transition-all group shadow-xs"
+              >
+                <div className="text-xs font-bold text-[#2F2D29] group-hover:text-[#1e3a5f] flex items-center justify-between">
+                  <span>Hospital / Org</span>
+                  <ArrowRight size={13} className="text-stone-400 group-hover:text-[#1e3a5f] transition-transform group-hover:translate-x-0.5" />
+                </div>
+                <p className="text-[11px] text-[#787469] mt-1">
+                  Roster doctors, audit patient record governance &amp; partitions
+                </p>
               </button>
             </div>
           </div>

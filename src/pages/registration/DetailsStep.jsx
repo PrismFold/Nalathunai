@@ -4,7 +4,7 @@ import { useRegistration } from '../../context/RegistrationContext';
 import { authService } from '../../services/authService';
 import { RegistrationHeader } from '../../components/RegistrationHeader';
 import { Button } from '../../components/Button';
-import { Shield, ArrowRight } from 'lucide-react';
+import { Shield, ArrowRight, CheckCircle2, ShieldCheck } from 'lucide-react';
 
 const bloodGroupOptions = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-', 'Unknown'];
 
@@ -12,17 +12,19 @@ export const DetailsStep = () => {
   const navigate = useNavigate();
   const { regState, setPersonalDetails } = useRegistration();
 
+  const demo = regState.verifiedDemographics || {};
+
+  const [fullName, setFullName] = useState(regState.personalDetails?.fullName || demo.name || '');
+  const [dateOfBirth, setDateOfBirth] = useState(regState.personalDetails?.dateOfBirth || demo.dateOfBirth || '');
+  const [bloodGroup, setBloodGroup] = useState(regState.personalDetails?.bloodGroup || demo.bloodGroup || 'O+');
+  const [email, setEmail] = useState(regState.personalDetails?.email || demo.email || '');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
   // Guard: Step 1 Aadhaar must be verified
   if (!regState.aadhaarVerified) {
     return <Navigate to="/register" replace />;
   }
-
-  const [fullName, setFullName] = useState(regState.personalDetails.fullName || 'Ananya Ramesh');
-  const [dateOfBirth, setDateOfBirth] = useState(regState.personalDetails.dateOfBirth || '1992-05-14');
-  const [bloodGroup, setBloodGroup] = useState(regState.personalDetails.bloodGroup || 'O+');
-  const [email, setEmail] = useState(regState.personalDetails.email || 'ananya.ramesh@example.com');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -44,10 +46,10 @@ export const DetailsStep = () => {
     setLoading(true);
     try {
       await authService.savePersonalDetails({
-        fullName,
+        fullName: fullName.trim(),
         dateOfBirth,
         bloodGroup,
-        email,
+        email: email.trim(),
       });
 
       setPersonalDetails({
@@ -55,6 +57,9 @@ export const DetailsStep = () => {
         dateOfBirth,
         bloodGroup,
         email: email.trim(),
+        abhaId: demo.abhaId,
+        city: demo.city,
+        primaryHospital: demo.primaryHospital,
       });
 
       navigate('/register/email-verification');
@@ -73,11 +78,24 @@ export const DetailsStep = () => {
       <div className="w-full max-w-sm">
         <RegistrationHeader
           currentStepId={2}
-          title="Tell us about yourself"
-          subtitle="Add a few details to complete your profile."
+          title="Personal Details & Health Identity"
+          subtitle="Confirm your verified e-KYC profile to complete your account."
         />
 
         <div className="bg-[#FAF7F2] border border-[#E5DDD0] rounded-2xl shadow-sm overflow-hidden p-6 space-y-4">
+          {/* Verified e-KYC Badge */}
+          <div className="p-3 bg-[#EBF0E6] border border-[#CFDCB8] rounded-xl flex items-center justify-between text-xs text-[#425938]">
+            <div className="flex items-center gap-2">
+              <ShieldCheck size={16} className="text-[#425938]" />
+              <span className="font-semibold">Aadhaar e-KYC Verified</span>
+            </div>
+            {demo.abhaId && (
+              <span className="font-mono text-[10px] bg-white/70 px-2 py-0.5 rounded border border-[#CFDCB8]">
+                {demo.abhaId}
+              </span>
+            )}
+          </div>
+
           {error && (
             <div className="p-3 bg-[#FDF2F0] border border-[#F3C4BE] text-[#9A2D23] text-xs rounded-md flex items-center gap-2">
               <Shield className="shrink-0 text-[#C94F45]" size={15} strokeWidth={1.75} />
@@ -89,7 +107,7 @@ export const DetailsStep = () => {
             {/* Full Name */}
             <div>
               <label className="block text-xs font-semibold text-[#2F2D29] mb-1.5">
-                Full Name
+                Full Name (as on Aadhaar)
               </label>
               <input
                 type="text"

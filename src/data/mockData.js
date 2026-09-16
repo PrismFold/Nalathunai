@@ -1,4 +1,5 @@
 // Mock Data for Nalathunai Patient-Controlled Healthcare Record Platform MVP
+// Configured with Fake Hospitals & Verified Baseline Data for Demonstration
 
 export const initialPatientProfile = {
   id: "PAT-9082",
@@ -11,7 +12,7 @@ export const initialPatientProfile = {
   bloodGroup: "O+",
   emergencyContact: "Ramesh Kumar (Father) - +91 98765 00000",
   address: "42, Race Course Road, Coimbatore, Tamil Nadu - 641018",
-  primaryHospital: "PSG Hospital, Coimbatore",
+  primaryHospital: "Lotus Valley Multispeciality Hospital",
 };
 
 export const initialRecords = [
@@ -19,7 +20,7 @@ export const initialRecords = [
     id: "REC-101",
     title: "Complete Blood Count (CBC) Report",
     type: "Lab Reports",
-    hospital: "PSG Hospital",
+    hospital: "Kovai Care Wellness Clinic",
     doctor: "Dr. S. Malathi",
     date: "02 Sep 2026",
     status: "Available",
@@ -28,17 +29,24 @@ export const initialRecords = [
     fileSize: "1.2 MB",
     categoryIcon: "FlaskConical",
     details: {
-      labName: "PSG Clinical Pathology Lab",
+      labName: "Kovai Clinical Pathology Lab",
       testCode: "LAB-CBC-2026-88",
       refDoctor: "Dr. S. Malathi (Internal Medicine)",
       remarks: "Patient is healthy. Annual checkup recommended in Sep 2027.",
     },
+    source: {
+      system: "kovai_care_abdm",
+      facility: "Kovai Care Wellness Clinic",
+      source_record_id: "KC-CBC-8812",
+      retrieved_at: "2026-09-02T10:30:00Z",
+      connector_status: "verified"
+    }
   },
   {
     id: "REC-102",
     title: "Amoxicillin & Pain Relief Prescription",
     type: "Prescriptions",
-    hospital: "City Hospital",
+    hospital: "City Care Multispeciality",
     doctor: "Dr. Priya Nair",
     date: "28 Aug 2026",
     status: "Available",
@@ -49,14 +57,21 @@ export const initialRecords = [
     details: {
       diagnosis: "Acute Pharyngitis",
       validTill: "15 Sep 2026",
-      pharmacyNote: "Dispensed at City Hospital Pharmacy Counter 3.",
+      pharmacyNote: "Dispensed at City Care Pharmacy Counter 3.",
     },
+    source: {
+      system: "city_care_api",
+      facility: "City Care Multispeciality",
+      source_record_id: "CC-RX-4912",
+      retrieved_at: "2026-08-28T14:15:00Z",
+      connector_status: "verified"
+    }
   },
   {
     id: "REC-103",
     title: "General Wellness & Cardiology Consult",
     type: "Consultations",
-    hospital: "ABC Hospital",
+    hospital: "Lotus Valley Multispeciality Hospital",
     doctor: "Dr. Arun Kumar",
     date: "20 Aug 2026",
     status: "Available",
@@ -69,12 +84,19 @@ export const initialRecords = [
       vitals: "BP: 120/80 mmHg, SpO2: 99%, Weight: 62 kg",
       nextFollowUp: "20 Nov 2026",
     },
+    source: {
+      system: "lotus_valley_fhir",
+      facility: "Lotus Valley Multispeciality Hospital",
+      source_record_id: "LV-ENC-3021",
+      retrieved_at: "2026-08-20T09:45:00Z",
+      connector_status: "verified"
+    }
   },
   {
     id: "REC-104",
     title: "Chest X-Ray Digital Scan",
     type: "Scans",
-    hospital: "Apex Diagnostic Center",
+    hospital: "Apex Diagnostic & Pathology Center",
     doctor: "Dr. K. Rajesh",
     date: "15 Jul 2026",
     status: "Available",
@@ -87,12 +109,19 @@ export const initialRecords = [
       accessionNo: "APX-XR-99210",
       radiologist: "Dr. K. Rajesh, MD Radiology",
     },
+    source: {
+      system: "apex_diag_pacs",
+      facility: "Apex Diagnostic & Pathology Center",
+      source_record_id: "APX-XR-99210",
+      retrieved_at: "2026-07-15T16:20:00Z",
+      connector_status: "verified"
+    }
   },
   {
     id: "REC-105",
     title: "Comprehensive Lipid Profile",
     type: "Lab Reports",
-    hospital: "PSG Hospital",
+    hospital: "Kovai Care Wellness Clinic",
     doctor: "Dr. S. Malathi",
     date: "05 May 2026",
     status: "Available",
@@ -102,8 +131,15 @@ export const initialRecords = [
     categoryIcon: "FlaskConical",
     details: {
       fastingDuration: "12 Hours Fasting",
-      labName: "PSG Biochemistry Lab",
+      labName: "Kovai Biochemistry Lab",
     },
+    source: {
+      system: "kovai_care_abdm",
+      facility: "Kovai Care Wellness Clinic",
+      source_record_id: "KC-LP-5012",
+      retrieved_at: "2026-05-05T11:00:00Z",
+      connector_status: "verified"
+    }
   },
 ];
 
@@ -111,7 +147,7 @@ export const initialConsents = [
   {
     id: "CONS-01",
     doctorName: "Dr. Arun Kumar",
-    hospitalName: "ABC Hospital",
+    hospitalName: "Lotus Valley Multispeciality Hospital",
     accessLevel: "Medical Records & Prescriptions",
     requestedRecords: ["Consultations", "Prescriptions", "Lab Reports"],
     status: "Active",
@@ -123,7 +159,7 @@ export const initialConsents = [
   {
     id: "CONS-02",
     doctorName: "Dr. S. Malathi",
-    hospitalName: "PSG Hospital",
+    hospitalName: "Kovai Care Wellness Clinic",
     accessLevel: "Lab Reports & Diagnostic Scans",
     requestedRecords: ["Lab Reports", "Scans"],
     status: "Active",
@@ -138,7 +174,7 @@ export const initialPendingRequests = [
   {
     id: "REQ-101",
     requesterName: "Dr. Rajesh V (Cardiology)",
-    hospitalName: "ABC Hospital",
+    hospitalName: "Lotus Valley Multispeciality Hospital",
     accessLevel: "All Medical Records & Diagnostic Scans",
     requestedRecords: ["Lab Reports", "Prescriptions", "Consultations", "Scans"],
     duration: "30 Days",
@@ -148,8 +184,8 @@ export const initialPendingRequests = [
   },
   {
     id: "REQ-102",
-    requesterName: "Kovai Care Wellness Clinic",
-    hospitalName: "Kovai Care Clinic",
+    requesterName: "City Care Clinic Administration",
+    hospitalName: "City Care Multispeciality",
     accessLevel: "Lab Reports & Prescriptions",
     requestedRecords: ["Lab Reports", "Prescriptions"],
     duration: "14 Days",
@@ -162,16 +198,16 @@ export const initialPendingRequests = [
 export const initialRecordRequests = [
   {
     id: "RET-201",
-    hospitalName: "PSG Hospital",
+    hospitalName: "Kovai Care Wellness Clinic",
     recordType: "Lab Reports",
     dateRange: "01 Sep 2026 - 05 Sep 2026",
-    status: "Requested",
+    status: "Retrieved",
     requestedAt: "Today, 09:15 AM",
     notes: "Request for recent Allergy Panel Test",
   },
   {
     id: "RET-202",
-    hospitalName: "City Hospital",
+    hospitalName: "City Care Multispeciality",
     recordType: "Prescriptions",
     dateRange: "20 Aug 2026 - 30 Aug 2026",
     status: "Processing",
@@ -180,7 +216,7 @@ export const initialRecordRequests = [
   },
   {
     id: "RET-203",
-    hospitalName: "Apex Diagnostic Center",
+    hospitalName: "Apex Diagnostic & Pathology Center",
     recordType: "Scans",
     dateRange: "10 Jul 2026 - 20 Jul 2026",
     status: "Retrieved",
@@ -193,7 +229,7 @@ export const initialActivityLog = [
   {
     id: "ACT-01",
     title: "Approved Access Request",
-    description: "You approved access for ABC Hospital (Dr. Arun Kumar) for 30 Days.",
+    description: "You approved access for Lotus Valley Hospital (Dr. Arun Kumar) for 30 Days.",
     timestamp: "Today, 10:15 AM",
     type: "consent",
     icon: "ShieldCheck",
@@ -201,7 +237,7 @@ export const initialActivityLog = [
   {
     id: "ACT-02",
     title: "Health Record Retrieved",
-    description: "Blood Test record retrieved successfully from PSG Hospital.",
+    description: "Blood Test record retrieved successfully from Kovai Care Wellness Clinic.",
     timestamp: "Yesterday, 04:30 PM",
     type: "record",
     icon: "FileCheck",
@@ -217,7 +253,7 @@ export const initialActivityLog = [
   {
     id: "ACT-04",
     title: "Access Revoked",
-    description: "Access permission revoked for XYZ Clinic.",
+    description: "Access permission revoked for St. Jude Community Hospital.",
     timestamp: "5 days ago, 02:45 PM",
     type: "consent",
     icon: "ShieldAlert",
@@ -225,7 +261,7 @@ export const initialActivityLog = [
   {
     id: "ACT-05",
     title: "Record Retrieval Submitted",
-    description: "Request submitted for Echocardiogram Scan to Apex Diagnostics.",
+    description: "Request submitted for Echocardiogram Scan to Apex Diagnostic Center.",
     timestamp: "01 Sep 2026, 09:10 AM",
     type: "request",
     icon: "DownloadCloud",
@@ -236,7 +272,7 @@ export const initialNotifications = [
   {
     id: "NOT-01",
     title: "New Access Request",
-    message: "ABC Hospital (Dr. Rajesh V) requested access to your medical records for Cardiology evaluation.",
+    message: "Lotus Valley Hospital (Dr. Rajesh V) requested access to your medical records for Cardiology evaluation.",
     timestamp: "2 hours ago",
     read: false,
     type: "request",
@@ -245,7 +281,7 @@ export const initialNotifications = [
   {
     id: "NOT-02",
     title: "Record Retrieval Complete",
-    message: "Your Blood Test report from PSG Hospital is now available in My Records.",
+    message: "Your Blood Test report from Kovai Care Wellness Clinic is now available in My Records.",
     timestamp: "1 day ago",
     read: true,
     type: "record",
@@ -254,7 +290,7 @@ export const initialNotifications = [
   {
     id: "NOT-03",
     title: "Consent Expiring Soon",
-    message: "Access for Dr. Arun Kumar (ABC Hospital) expires in 8 days on 15 Sep 2026.",
+    message: "Access for Dr. Arun Kumar (Lotus Valley Hospital) expires in 8 days on 15 Sep 2026.",
     timestamp: "2 days ago",
     read: true,
     type: "warning",
@@ -263,7 +299,7 @@ export const initialNotifications = [
   {
     id: "NOT-04",
     title: "New Record Available",
-    message: "City Hospital uploaded a new prescription record.",
+    message: "City Care Multispeciality uploaded a new prescription record.",
     timestamp: "5 days ago",
     read: true,
     type: "record",

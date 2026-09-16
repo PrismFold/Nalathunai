@@ -1,5 +1,4 @@
-// Activity & Audit Logging Service for Nalathunai Patient Platform
-import { initialActivityLog } from '../data/mockData';
+import { initialActivityLog } from '../data/mockData.js';
 
 const ACTIVITY_STORAGE_KEY = 'nalathunai_activity_log';
 
